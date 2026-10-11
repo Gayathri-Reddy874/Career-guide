@@ -1,0 +1,563 @@
+/* static/css/mobile.css */
+
+/* Mobile-first responsive styles */
+@media (max-width: 768px) {
+    /* General adjustments */
+    body {
+        font-size: 14px;
+    }
+    
+    .container {
+        padding: 0 16px;
+    }
+    
+    /* Header mobile adjustments */
+    .header-content {
+        padding: 12px 0;
+    }
+    
+    .logo span {
+        font-size: 1.1rem;
+    }
+    
+    /* Hero section mobile */
+    .hero {
+        padding: 40px 0;
+    }
+    
+    .hero h1 {
+        font-size: 1.75rem;
+        margin-bottom: 16px;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+        margin-bottom: 24px;
+    }
+    
+    .hero-actions {
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 32px;
+    }
+    
+    .hero-actions .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 14px;
+    }
+    
+    .hero-stats {
+        flex-direction: row;
+        justify-content: space-around;
+        gap: 16px;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+    }
+    
+    /* Section titles */
+    .section-title {
+        font-size: 1.5rem;
+        margin-bottom: 12px;
+    }
+    
+    .section-subtitle {
+        font-size: 0.875rem;
+        margin-bottom: 32px;
+    }
+    
+    /* Category grid mobile */
+    .category-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 16px;
+    }
+    
+    .category-card {
+        padding: 16px;
+    }
+    
+    .category-icon {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .category-icon i {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .category-card h3 {
+        font-size: 1rem;
+    }
+    
+    .category-count {
+        font-size: 0.75rem;
+    }
+    
+    /* Career cards mobile */
+    .career-carousel,
+    .recommendations-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .career-card {
+        padding: 16px;
+    }
+    
+    .career-card h3 {
+        font-size: 1.125rem;
+    }
+    
+    /* Steps section mobile */
+    .steps {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    
+    .step {
+        text-align: center;
+    }
+    
+    /* Testimonials mobile */
+    .testimonial-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    /* Quiz mobile */
+    .quiz-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .quiz-question h3 {
+        font-size: 1.25rem;
+        margin-bottom: 24px;
+    }
+    
+    .options {
+        gap: 12px;
+    }
+    
+    .options.multiple {
+        grid-template-columns: 1fr;
+    }
+    
+    .option {
+        padding: 12px;
+    }
+    
+    .quiz-navigation {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .quiz-navigation .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Results mobile */
+    .results-filters {
+        gap: 8px;
+        margin-bottom: 24px;
+    }
+    
+    .filter-btn {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+    
+    /* Career detail mobile */
+    .career-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .career-badge {
+        align-self: flex-start;
+    }
+    
+    .info-card {
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .info-card h3 {
+        font-size: 1.125rem;
+        margin-bottom: 16px;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .salary-level {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .salary-bar {
+        width: 100%;
+    }
+    
+    .salary-amount {
+        align-self: flex-end;
+    }
+    
+    .skill-tags {
+        gap: 6px;
+    }
+    
+    .skill-tag {
+        font-size: 0.75rem;
+        padding: 3px 10px;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Chatbot mobile */
+    .chatbot-container {
+        margin: 0;
+        border-radius: 12px;
+    }
+    
+    .chat-messages {
+        height: 400px;
+        padding: 16px;
+    }
+    
+    .message-content {
+        max-width: 90%;
+        font-size: 0.875rem;
+    }
+    
+    .chat-suggestions {
+        padding: 12px;
+        gap: 8px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .suggestion-chip {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+    
+    .chat-input-wrapper {
+        padding: 12px;
+    }
+    
+    .chat-input-wrapper input {
+        padding: 10px 14px;
+        font-size: 0.875rem;
+    }
+    
+    /* Footer mobile */
+    .footer {
+        padding: 32px 0 20px;
+        margin-top: 48px;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        text-align: center;
+    }
+    
+    .footer-section h4 {
+        margin-bottom: 12px;
+    }
+    
+    .footer-section ul li {
+        margin-bottom: 6px;
+    }
+    
+    .footer-bottom {
+        padding-top: 20px;
+        font-size: 0.75rem;
+    }
+    
+    /* Loading states */
+    .loading-spinner {
+        text-align: center;
+        padding: 40px;
+    }
+    
+    /* Compare page mobile */
+    .compare-controls {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .compare-select {
+        width: 100%;
+    }
+    
+    .compare-table {
+        overflow-x: auto;
+    }
+    
+    .compare-table table {
+        min-width: 600px;
+    }
+    
+    /* Resources page mobile */
+    .resource-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .resource-card {
+        padding: 16px;
+    }
+    
+    /* Modals */
+    .modal-content {
+        width: 90%;
+        margin: 20px auto;
+        padding: 20px;
+    }
+}
+
+/* Small phones (up to 480px) */
+@media (max-width: 480px) {
+    .hero h1 {
+        font-size: 1.5rem;
+    }
+    
+    .stat-number {
+        font-size: 1.25rem;
+    }
+    
+    .category-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .category-card {
+        padding: 12px;
+    }
+    
+    .category-card h3 {
+        font-size: 0.875rem;
+    }
+    
+    .results-filters {
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        flex: 1;
+        text-align: center;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    .btn,
+    .category-card,
+    .career-card,
+    .option,
+    .filter-btn,
+    .suggestion-chip {
+        min-height: 44px;
+        /* Minimum touch target size */
+    }
+    
+    .option {
+        min-height: 48px;
+    }
+    
+    button,
+    a {
+        cursor: default;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #1a1a2e;
+        --surface: #16213e;
+        --text: #eef2ff;
+        --text-light: #9ca3af;
+    }
+    
+    body {
+        background-color: var(--bg);
+    }
+    
+    .category-card,
+    .career-card,
+    .info-card,
+    .similar-careers,
+    .chatbot-container {
+        background: var(--surface);
+    }
+    
+    .skill-tag {
+        background: rgba(74, 111, 165, 0.2);
+    }
+    
+    .option {
+        background: var(--surface);
+    }
+    
+    .option:hover {
+        background: rgba(74, 111, 165, 0.1);
+    }
+    
+    .chat-input-wrapper input {
+        background: var(--surface);
+        border-color: #2d3748;
+        color: var(--text);
+    }
+    
+    .chat-input-wrapper input:focus {
+        border-color: var(--primary);
+    }
+}
+
+/* Animation classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+.slide-up {
+    animation: slideUp 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Loading spinner */
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+}
+
+.loading-spinner i {
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    color: var(--primary);
+}
+
+.loading-spinner p {
+    margin-top: 16px;
+    color: var(--text-light);
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* No results state */
+.no-results {
+    text-align: center;
+    padding: 48px;
+    background: var(--surface);
+    border-radius: var(--border-radius);
+}
+
+.no-results i {
+    width: 48px;
+    height: 48px;
+    color: var(--text-light);
+    margin-bottom: 16px;
+}
+
+.no-results p {
+    color: var(--text-light);
+}
+
+/* Toast notifications */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--surface);
+    color: var(--text);
+    padding: 12px 24px;
+    border-radius: 40px;
+    box-shadow: var(--shadow-hover);
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.toast.success {
+    background: var(--success);
+    color: white;
+}
+
+.toast.error {
+    background: var(--error);
+    color: white;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--secondary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
