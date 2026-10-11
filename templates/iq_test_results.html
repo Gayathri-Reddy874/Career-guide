@@ -1,0 +1,628 @@
+<!-- templates/iq_test_results.html -->
+{% extends "base.html" %}
+
+{% block title %}IQ Test Results - CareerGuide AI{% endblock %}
+
+{% block content %}
+<div class="results-page">
+    <div class="container">
+        <div class="results-header">
+            <h1>🧠 Your IQ Test Results</h1>
+            <p>Comprehensive analysis of your cognitive abilities</p>
+        </div>
+
+        <!-- Main IQ Score Card -->
+        <div class="iq-score-card">
+            <div class="iq-score-display">
+                <div class="iq-score-number" id="iqScore">--</div>
+                <div class="iq-score-label">IQ Score</div>
+                <div class="iq-percentile" id="percentile">--</div>
+            </div>
+            <div class="iq-rating" id="iqRating"></div>
+            <div class="iq-description" id="iqDescription"></div>
+        </div>
+
+        <!-- Section Scores -->
+        <div class="section-scores">
+            <h2>Cognitive Abilities Breakdown</h2>
+            <div class="scores-grid">
+                <div class="score-card">
+                    <div class="score-icon"><i data-feather="grid"></i></div>
+                    <h3>Logical Reasoning</h3>
+                    <div class="score-value" id="logicalScore">--/8</div>
+                    <div class="score-bar">
+                        <div class="score-fill" id="logicalFill"></div>
+                    </div>
+                    <p id="logicalDesc"></p>
+                </div>
+                <div class="score-card">
+                    <div class="score-icon"><i data-feather="hash"></i></div>
+                    <h3>Numerical Ability</h3>
+                    <div class="score-value" id="numericalScore">--/8</div>
+                    <div class="score-bar">
+                        <div class="score-fill" id="numericalFill"></div>
+                    </div>
+                    <p id="numericalDesc"></p>
+                </div>
+                <div class="score-card">
+                    <div class="score-icon"><i data-feather="book-open"></i></div>
+                    <h3>Verbal Comprehension</h3>
+                    <div class="score-value" id="verbalScore">--/8</div>
+                    <div class="score-bar">
+                        <div class="score-fill" id="verbalFill"></div>
+                    </div>
+                    <p id="verbalDesc"></p>
+                </div>
+                <div class="score-card">
+                    <div class="score-icon"><i data-feather="box"></i></div>
+                    <h3>Spatial Awareness</h3>
+                    <div class="score-value" id="spatialScore">--/8</div>
+                    <div class="score-bar">
+                        <div class="score-fill" id="spatialFill"></div>
+                    </div>
+                    <p id="spatialDesc"></p>
+                </div>
+                <div class="score-card">
+                    <div class="score-icon"><i data-feather="database"></i></div>
+                    <h3>Memory & Recall</h3>
+                    <div class="score-value" id="memoryScore">--/8</div>
+                    <div class="score-bar">
+                        <div class="score-fill" id="memoryFill"></div>
+                    </div>
+                    <p id="memoryDesc"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Career Recommendations Based on IQ -->
+        <div class="career-recommendations">
+            <h2>🎯 Career Recommendations Based on Your Cognitive Profile</h2>
+            <div id="careerMatches" class="career-matches"></div>
+        </div>
+
+        <!-- AI Generated Summary -->
+        <div class="ai-summary">
+            <h2>🤖 AI Analysis & Insights</h2>
+            <div id="aiSummary" class="summary-content"></div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button onclick="downloadReport()" class="btn btn-primary">
+                <i data-feather="download"></i> Download Report
+            </button>
+            <button onclick="shareResults()" class="btn btn-outline">
+                <i data-feather="share-2"></i> Share Results
+            </button>
+            <a href="/psychometric-test" class="btn btn-outline">
+                <i data-feather="brain"></i> Take Psychometric Test
+            </a>
+            <a href="/iq-test" class="btn btn-outline">
+                <i data-feather="refresh-cw"></i> Retake IQ Test
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+let results = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const storedResults = sessionStorage.getItem('iqTestResults');
+    if (storedResults) {
+        results = JSON.parse(storedResults);
+        renderResults(results);
+    } else {
+        window.location.href = '/iq-test';
+    }
+});
+
+function renderResults(data) {
+    // Display IQ Score
+    document.getElementById('iqScore').textContent = data.iq_score;
+    document.getElementById('percentile').textContent = getPercentile(data.iq_score);
+    document.getElementById('iqRating').innerHTML = getIQRating(data.iq_score);
+    document.getElementById('iqDescription').innerHTML = getIQDescription(data.iq_score);
+    
+    // Display Section Scores
+    displaySectionScore('logical', data.section_scores.logical, 8);
+    displaySectionScore('numerical', data.section_scores.numerical, 8);
+    displaySectionScore('verbal', data.section_scores.verbal, 8);
+    displaySectionScore('spatial', data.section_scores.spatial, 8);
+    displaySectionScore('memory', data.section_scores.memory, 8);
+    
+    // Display Career Recommendations
+    displayCareerRecommendations(data);
+    
+    // Display AI Summary
+    displayAISummary(data);
+}
+
+function displaySectionScore(section, score, total) {
+    const percentage = (score / total) * 100;
+    document.getElementById(`${section}Score`).textContent = `${score}/${total}`;
+    document.getElementById(`${section}Fill`).style.width = `${percentage}%`;
+    document.getElementById(`${section}Desc`).textContent = getSectionDescription(section, percentage);
+}
+
+function getSectionDescription(section, percentage) {
+    const descriptions = {
+        logical: {
+            high: "Excellent pattern recognition and analytical thinking. You excel at identifying relationships and solving complex problems.",
+            medium: "Good logical reasoning skills. You can identify patterns and solve most analytical problems.",
+            low: "Basic logical reasoning. Practice with puzzles and brain teasers can help improve these skills."
+        },
+        numerical: {
+            high: "Outstanding mathematical ability. You have strong numerical reasoning and calculation skills.",
+            medium: "Good numerical skills. You can handle most mathematical problems effectively.",
+            low: "Basic numerical ability. Regular practice with math problems can help strengthen these skills."
+        },
+        verbal: {
+            high: "Excellent verbal comprehension. You have strong vocabulary and language understanding.",
+            medium: "Good verbal skills. You communicate effectively and understand complex texts.",
+            low: "Basic verbal comprehension. Reading regularly can help improve these skills."
+        },
+        spatial: {
+            high: "Exceptional spatial awareness. You excel at visualizing and manipulating objects in space.",
+            medium: "Good spatial skills. You can visualize shapes and patterns effectively.",
+            low: "Basic spatial awareness. Practice with puzzles and 3D models can help improve."
+        },
+        memory: {
+            high: "Outstanding memory capacity. You have excellent recall and retention abilities.",
+            medium: "Good memory skills. You can remember patterns and sequences effectively.",
+            low: "Basic memory recall. Using mnemonic techniques can help improve memory."
+        }
+    };
+    
+    let level;
+    if (percentage >= 75) level = 'high';
+    else if (percentage >= 50) level = 'medium';
+    else level = 'low';
+    
+    return descriptions[section][level];
+}
+
+function getPercentile(iqScore) {
+    if (iqScore >= 145) return "Top 0.1%";
+    if (iqScore >= 130) return "Top 2%";
+    if (iqScore >= 115) return "Top 16%";
+    if (iqScore >= 100) return "Top 50%";
+    if (iqScore >= 85) return "Bottom 16%";
+    return "Bottom 2%";
+}
+
+function getIQRating(iqScore) {
+    if (iqScore >= 145) return '<span class="rating genius">🌟 Genius Level</span>';
+    if (iqScore >= 130) return '<span class="rating gifted">🎓 Gifted / Very Superior</span>';
+    if (iqScore >= 115) return '<span class="rating above">📚 Above Average</span>';
+    if (iqScore >= 85) return '<span class="rating average">👍 Average</span>';
+    if (iqScore >= 70) return '<span class="rating below">📖 Below Average</span>';
+    return '<span class="rating low">⚠️ Needs Improvement</span>';
+}
+
+function getIQDescription(iqScore) {
+    if (iqScore >= 145) return "Your cognitive abilities are exceptionally high. You have remarkable problem-solving skills and intellectual capacity.";
+    if (iqScore >= 130) return "You have superior cognitive abilities. You excel at complex reasoning and abstract thinking.";
+    if (iqScore >= 115) return "Your cognitive abilities are above average. You have good analytical and reasoning skills.";
+    if (iqScore >= 85) return "You have average cognitive abilities. You can handle most intellectual tasks effectively.";
+    if (iqScore >= 70) return "Your cognitive abilities are in the below-average range. With practice and learning, you can improve.";
+    return "Your cognitive abilities are in the lower range. Consider focusing on skill development and practice.";
+}
+
+function displayCareerRecommendations(data) {
+    const container = document.getElementById('careerMatches');
+    const iqScore = data.iq_score;
+    const strengths = [];
+    
+    // Identify strengths
+    if (data.section_scores.logical >= 6) strengths.push('logical reasoning');
+    if (data.section_scores.numerical >= 6) strengths.push('mathematical ability');
+    if (data.section_scores.verbal >= 6) strengths.push('verbal comprehension');
+    if (data.section_scores.spatial >= 6) strengths.push('spatial awareness');
+    if (data.section_scores.memory >= 6) strengths.push('memory and recall');
+    
+    // Generate career recommendations based on IQ and strengths
+    let recommendations = [];
+    
+    if (iqScore >= 130) {
+        recommendations = [
+            { title: "Research Scientist", match: 95, reason: "High IQ suitable for complex research" },
+            { title: "Data Scientist", match: 92, reason: "Strong analytical and numerical skills" },
+            { title: "AI/Machine Learning Engineer", match: 90, reason: "Excellent problem-solving abilities" },
+            { title: "Theoretical Physicist", match: 88, reason: "Abstract thinking and reasoning" },
+            { title: "Neurosurgeon", match: 85, reason: "Complex decision-making and precision" }
+        ];
+    } else if (iqScore >= 115) {
+        recommendations = [
+            { title: "Software Engineer", match: 88, reason: "Good analytical and logical skills" },
+            { title: "Financial Analyst", match: 85, reason: "Strong numerical ability" },
+            { title: "Architect", match: 82, reason: "Spatial awareness and design" },
+            { title: "Corporate Lawyer", match: 80, reason: "Verbal comprehension and reasoning" },
+            { title: "Medical Doctor", match: 78, reason: "Memory and analytical skills" }
+        ];
+    } else if (iqScore >= 100) {
+        recommendations = [
+            { title: "Business Analyst", match: 82, reason: "Problem-solving and communication" },
+            { title: "Graphic Designer", match: 80, reason: "Creative and spatial skills" },
+            { title: "Teacher/Educator", match: 78, reason: "Verbal and memory skills" },
+            { title: "Project Manager", match: 75, reason: "Organizational and logical skills" },
+            { title: "Marketing Specialist", match: 72, reason: "Creative and communication skills" }
+        ];
+    } else {
+        recommendations = [
+            { title: "Skilled Trades Professional", match: 85, reason: "Practical and hands-on work" },
+            { title: "Sales Representative", match: 82, reason: "Communication and interpersonal skills" },
+            { title: "Administrative Assistant", match: 78, reason: "Organizational skills" },
+            { title: "Customer Service Specialist", match: 75, reason: "Verbal communication" },
+            { title: "Technician", match: 72, reason: "Practical and technical skills" }
+        ];
+    }
+    
+    container.innerHTML = recommendations.map(rec => `
+        <div class="career-match-card">
+            <div class="match-header">
+                <h3>${rec.title}</h3>
+                <span class="match-score">${rec.match}% Match</span>
+            </div>
+            <p>${rec.reason}</p>
+        </div>
+    `).join('');
+}
+
+function displayAISummary(data) {
+    const summary = `
+        <div class="summary-section">
+            <h3>Your Cognitive Profile</h3>
+            <p>Based on your IQ test results (${data.iq_score}), you demonstrate ${getStrengthLevel(data)} cognitive abilities. Your strongest areas are ${getStrongestAreas(data)}.</p>
+        </div>
+        <div class="summary-section">
+            <h3>Recommended Development Areas</h3>
+            <p>${getDevelopmentAreas(data)}</p>
+        </div>
+        <div class="summary-section">
+            <h3>Study and Career Tips</h3>
+            <ul>
+                ${getStudyTips(data).map(tip => `<li>${tip}</li>`).join('')}
+            </ul>
+        </div>
+    `;
+    
+    document.getElementById('aiSummary').innerHTML = summary;
+}
+
+function getStrengthLevel(data) {
+    if (data.iq_score >= 130) return "exceptional";
+    if (data.iq_score >= 115) return "above-average";
+    if (data.iq_score >= 85) return "average";
+    return "developing";
+}
+
+function getStrongestAreas(data) {
+    const strengths = [];
+    if (data.section_scores.logical >= 6) strengths.push("logical reasoning");
+    if (data.section_scores.numerical >= 6) strengths.push("numerical ability");
+    if (data.section_scores.verbal >= 6) strengths.push("verbal comprehension");
+    if (data.section_scores.spatial >= 6) strengths.push("spatial awareness");
+    if (data.section_scores.memory >= 6) strengths.push("memory");
+    
+    if (strengths.length === 0) return "a balanced profile across all areas";
+    if (strengths.length === 1) return strengths[0];
+    return strengths.slice(0, -1).join(", ") + " and " + strengths.slice(-1);
+}
+
+function getDevelopmentAreas(data) {
+    const weaknesses = [];
+    if (data.section_scores.logical < 4) weaknesses.push("logical reasoning");
+    if (data.section_scores.numerical < 4) weaknesses.push("numerical ability");
+    if (data.section_scores.verbal < 4) weaknesses.push("verbal comprehension");
+    if (data.section_scores.spatial < 4) weaknesses.push("spatial awareness");
+    if (data.section_scores.memory < 4) weaknesses.push("memory");
+    
+    if (weaknesses.length === 0) {
+        return "You have a well-rounded cognitive profile. Focus on challenging yourself with advanced materials in your areas of interest.";
+    }
+    return `Consider focusing on improving your ${weaknesses.join(", ")} skills through targeted practice and exercises.`;
+}
+
+function getStudyTips(data) {
+    const tips = [];
+    
+    if (data.section_scores.logical < 5) {
+        tips.push("Practice puzzles like Sudoku, crosswords, and logic games to improve reasoning");
+    }
+    if (data.section_scores.numerical < 5) {
+        tips.push("Regular math practice and mental calculation exercises can strengthen numerical skills");
+    }
+    if (data.section_scores.verbal < 5) {
+        tips.push("Read widely and learn new vocabulary to enhance verbal comprehension");
+    }
+    if (data.section_scores.spatial < 5) {
+        tips.push("Try 3D puzzles, drawing, and visualization exercises to improve spatial awareness");
+    }
+    if (data.section_scores.memory < 5) {
+        tips.push("Use mnemonic techniques and regular recall exercises to boost memory");
+    }
+    
+    if (tips.length === 0) {
+        tips.push("Challenge yourself with advanced materials in your field of interest");
+        tips.push("Consider mentoring others to deepen your understanding");
+        tips.push("Explore interdisciplinary subjects to broaden your cognitive skills");
+    }
+    
+    return tips;
+}
+
+function downloadReport() {
+    const reportHtml = generateReportHtml();
+    const blob = new Blob([reportHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `iq_test_report_${new Date().toISOString().split('T')[0]}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function generateReportHtml() {
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>IQ Test Report - CareerGuide AI</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+                h1 { color: #4A6FA5; }
+                .score { font-size: 48px; font-weight: bold; color: #4A6FA5; }
+                .section { margin-bottom: 30px; }
+                @media print { body { margin: 0; } }
+            </style>
+        </head>
+        <body>
+            <h1>IQ Test Report</h1>
+            <p>Generated on: ${new Date().toLocaleDateString()}</p>
+            <div class="section">
+                <h2>Your IQ Score: ${results.iq_score}</h2>
+                <p>${getIQRating(results.iq_score)}</p>
+                <p>${getIQDescription(results.iq_score)}</p>
+            </div>
+            <div class="section">
+                <h2>Section Scores</h2>
+                <ul>
+                    <li>Logical Reasoning: ${results.section_scores.logical}/8</li>
+                    <li>Numerical Ability: ${results.section_scores.numerical}/8</li>
+                    <li>Verbal Comprehension: ${results.section_scores.verbal}/8</li>
+                    <li>Spatial Awareness: ${results.section_scores.spatial}/8</li>
+                    <li>Memory & Recall: ${results.section_scores.memory}/8</li>
+                </ul>
+            </div>
+            <div class="section">
+                <h2>Career Recommendations</h2>
+                ${document.getElementById('careerMatches').innerHTML}
+            </div>
+            <div class="section">
+                <h2>AI Analysis</h2>
+                ${document.getElementById('aiSummary').innerHTML}
+            </div>
+        </body>
+        </html>
+    `;
+}
+
+function shareResults() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'My IQ Test Results',
+            text: `My IQ score is ${results.iq_score}! Check out my cognitive profile.`,
+            url: window.location.href
+        });
+    } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+    }
+}
+</script>
+
+<style>
+.results-page {
+    padding: 100px 0 60px;
+    background: var(--bg, #F9F7F5);
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.results-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.iq-score-card {
+    background: linear-gradient(135deg, var(--primary, #4A6FA5), var(--secondary, #6B8C9E));
+    border-radius: 32px;
+    padding: 40px;
+    text-align: center;
+    color: white;
+    margin-bottom: 40px;
+}
+
+.iq-score-number {
+    font-size: 5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.iq-score-label {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-top: 8px;
+}
+
+.iq-percentile {
+    margin-top: 8px;
+    font-size: 0.875rem;
+    opacity: 0.8;
+}
+
+.iq-rating {
+    margin: 20px 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.rating {
+    padding: 8px 16px;
+    border-radius: 40px;
+    display: inline-block;
+}
+
+.rating.genius { background: rgba(255,215,0,0.2); }
+.rating.gifted { background: rgba(134,167,137,0.2); }
+.rating.above { background: rgba(74,111,165,0.2); }
+.rating.average { background: rgba(107,140,158,0.2); }
+.rating.below { background: rgba(232,168,124,0.2); }
+.rating.low { background: rgba(226,124,124,0.2); }
+
+.section-scores h2 {
+    margin-bottom: 24px;
+}
+
+.scores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.score-card {
+    background: var(--surface, white);
+    border-radius: 20px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+.score-icon i {
+    width: 40px;
+    height: 40px;
+    color: var(--primary, #4A6FA5);
+    margin-bottom: 12px;
+}
+
+.score-card h3 {
+    margin-bottom: 12px;
+    font-size: 1rem;
+}
+
+.score-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.score-bar {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.score-fill {
+    height: 100%;
+    background: var(--primary, #4A6FA5);
+    transition: width 0.5s;
+}
+
+.score-card p {
+    font-size: 0.875rem;
+    color: var(--text-light, #6B7280);
+}
+
+.career-recommendations, .ai-summary {
+    background: var(--surface, white);
+    border-radius: 24px;
+    padding: 28px;
+    margin-bottom: 24px;
+}
+
+.career-matches {
+    display: grid;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.career-match-card {
+    padding: 16px;
+    background: var(--bg, #F9F7F5);
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.match-header h3 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.match-score {
+    padding: 4px 12px;
+    background: #86A789;
+    color: white;
+    border-radius: 20px;
+    font-size: 0.75rem;
+}
+
+.summary-section {
+    margin-bottom: 20px;
+}
+
+.summary-section h3 {
+    margin-bottom: 10px;
+    color: var(--primary, #4A6FA5);
+}
+
+.summary-section ul {
+    margin-left: 20px;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .iq-score-number {
+        font-size: 3rem;
+    }
+    
+    .scores-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .career-match-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}

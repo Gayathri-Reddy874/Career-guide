@@ -1,0 +1,543 @@
+<!-- templates/register.html -->
+{% extends "base.html" %}
+
+{% block title %}Create Account - CareerGuide AI{% endblock %}
+
+{% block content %}
+<div class="register-page">
+    <div class="container">
+        <div class="register-container">
+            <div class="register-card">
+                <div class="register-header">
+                    <i data-feather="user-plus"></i>
+                    <h2>Create Your Account</h2>
+                    <p>Join CareerGuide AI to start your career journey</p>
+                </div>
+                
+                <form method="POST" class="register-form" id="registerForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="full_name">Full Name</label>
+                            <div class="input-icon">
+                                <i data-feather="user"></i>
+                                <input type="text" id="full_name" name="full_name" placeholder="Enter your full name">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="username">Username *</label>
+                            <div class="input-icon">
+                                <i data-feather="at-sign"></i>
+                                <input type="text" id="username" name="username" required placeholder="Choose a username">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <div class="input-icon">
+                            <i data-feather="mail"></i>
+                            <input type="email" id="email" name="email" required placeholder="Enter your email address">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <div class="input-icon">
+                            <i data-feather="phone"></i>
+                            <input type="tel" id="phone" name="phone" placeholder="Enter your phone number">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="education">Education Level</label>
+                            <div class="input-icon">
+                                <i data-feather="book-open"></i>
+                                <select id="education" name="education">
+                                    <option value="">Select your education level</option>
+                                    <option value="10+2">10+2 / High School</option>
+                                    <option value="Diploma">Diploma</option>
+                                    <option value="Bachelor's">Bachelor's Degree</option>
+                                    <option value="Master's">Master's Degree</option>
+                                    <option value="PhD">PhD / Doctorate</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="stream">Academic Stream</label>
+                            <div class="input-icon">
+                                <i data-feather="trending-up"></i>
+                                <select id="stream" name="stream">
+                                    <option value="">Select your stream</option>
+                                    <option value="Science">Science (PCM/PCB)</option>
+                                    <option value="Commerce">Commerce</option>
+                                    <option value="Arts">Arts / Humanities</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="password">Password *</label>
+                            <div class="input-icon">
+                                <i data-feather="lock"></i>
+                                <input type="password" id="password" name="password" required placeholder="Create a password">
+                            </div>
+                            <div class="password-strength" id="passwordStrength"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirm_password">Confirm Password *</label>
+                            <div class="input-icon">
+                                <i data-feather="lock"></i>
+                                <input type="password" id="confirm_password" name="confirm_password" required placeholder="Confirm your password">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="terms" name="terms" required>
+                            <span>I agree to the <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a></span>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block" id="registerBtn">
+                        <i data-feather="user-plus"></i>
+                        Create Account
+                    </button>
+                </form>
+                
+                <div class="register-footer">
+                    <p>Already have an account? <a href="/login">Sign in</a></p>
+                </div>
+                
+                <div class="register-benefits">
+                    <h4>Why join CareerGuide AI?</h4>
+                    <div class="benefits-list">
+                        <div class="benefit-item">
+                            <i data-feather="check-circle"></i>
+                            <span>Personalized career recommendations</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i data-feather="check-circle"></i>
+                            <span>Comprehensive psychometric assessment</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i data-feather="check-circle"></i>
+                            <span>Save and track your progress</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i data-feather="check-circle"></i>
+                            <span>AI-powered career guidance</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i data-feather="check-circle"></i>
+                            <span>Access to 300+ career profiles</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Password strength checker
+const passwordInput = document.getElementById('password');
+const confirmInput = document.getElementById('confirm_password');
+const passwordStrength = document.getElementById('passwordStrength');
+const registerBtn = document.getElementById('registerBtn');
+const registerForm = document.getElementById('registerForm');
+
+passwordInput.addEventListener('input', function() {
+    const password = this.value;
+    const strength = checkPasswordStrength(password);
+    updatePasswordStrengthIndicator(strength);
+});
+
+function checkPasswordStrength(password) {
+    let strength = 0;
+    
+    if (password.length === 0) return 0;
+    if (password.length >= 8) strength++;
+    if (password.length >= 12) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+    
+    return Math.min(strength, 4);
+}
+
+function updatePasswordStrengthIndicator(strength) {
+    const messages = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+    const colors = ['', '#E27C7C', '#E8A87C', '#86A789', '#4A6FA5'];
+    
+    if (strength === 0) {
+        passwordStrength.innerHTML = '';
+        passwordStrength.className = 'password-strength';
+        return;
+    }
+    
+    passwordStrength.innerHTML = `
+        <div class="strength-bar">
+            <div class="strength-fill" style="width: ${strength * 25}%; background: ${colors[strength]}"></div>
+        </div>
+        <span class="strength-text" style="color: ${colors[strength]}">${messages[strength]}</span>
+    `;
+}
+
+// Confirm password validation
+function validatePasswords() {
+    const password = passwordInput.value;
+    const confirm = confirmInput.value;
+    
+    if (confirm.length === 0) return true;
+    
+    if (password !== confirm) {
+        confirmInput.setCustomValidity('Passwords do not match');
+        return false;
+    } else {
+        confirmInput.setCustomValidity('');
+        return true;
+    }
+}
+
+passwordInput.addEventListener('change', validatePasswords);
+confirmInput.addEventListener('input', validatePasswords);
+
+// Form validation before submit
+registerForm.addEventListener('submit', function(e) {
+    if (!validatePasswords()) {
+        e.preventDefault();
+        alert('Please make sure your passwords match.');
+        return false;
+    }
+    
+    const username = document.getElementById('username').value;
+    if (username.length < 3) {
+        e.preventDefault();
+        alert('Username must be at least 3 characters long.');
+        return false;
+    }
+    
+    const email = document.getElementById('email').value;
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+        e.preventDefault();
+        alert('Please enter a valid email address.');
+        return false;
+    }
+    
+    const password = passwordInput.value;
+    if (password.length < 6) {
+        e.preventDefault();
+        alert('Password must be at least 6 characters long.');
+        return false;
+    }
+    
+    const terms = document.getElementById('terms');
+    if (!terms.checked) {
+        e.preventDefault();
+        alert('Please agree to the Terms of Service and Privacy Policy.');
+        return false;
+    }
+    
+    // Show loading state
+    const btn = document.getElementById('registerBtn');
+    btn.innerHTML = '<i data-feather="loader"></i> Creating Account...';
+    btn.disabled = true;
+});
+</script>
+
+<style>
+.register-page {
+    padding: 100px 0 80px;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--bg, #F9F7F5) 0%, #f0f0f0 100%);
+}
+
+.register-container {
+    max-width: 650px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.register-card {
+    background: var(--surface, white);
+    border-radius: 28px;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.register-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.register-header i {
+    width: 56px;
+    height: 56px;
+    color: var(--primary, #4A6FA5);
+    margin-bottom: 16px;
+}
+
+.register-header h2 {
+    font-size: 1.75rem;
+    margin-bottom: 8px;
+    color: var(--text, #2D3E50);
+}
+
+.register-header p {
+    color: var(--text-light, #6B7280);
+}
+
+.register-form {
+    margin-bottom: 24px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 0;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: var(--text, #2D3E50);
+}
+
+.input-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon i {
+    position: absolute;
+    left: 14px;
+    width: 18px;
+    height: 18px;
+    color: var(--text-light, #6B7280);
+    pointer-events: none;
+}
+
+.input-icon input,
+.input-icon select {
+    width: 100%;
+    padding: 12px 12px 12px 42px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    background: var(--surface, white);
+    font-family: inherit;
+}
+
+.input-icon input:focus,
+.input-icon select:focus {
+    outline: none;
+    border-color: var(--primary, #4A6FA5);
+    box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.1);
+}
+
+.input-icon select {
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+}
+
+/* Password Strength */
+.password-strength {
+    margin-top: 8px;
+}
+
+.strength-bar {
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.strength-fill {
+    height: 100%;
+    transition: width 0.3s;
+}
+
+.strength-text {
+    font-size: 0.7rem;
+}
+
+/* Checkbox Group */
+.checkbox-group {
+    margin: 20px 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--text-light, #6B7280);
+}
+
+.checkbox-label input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.checkbox-label a {
+    color: var(--primary, #4A6FA5);
+    text-decoration: none;
+}
+
+.checkbox-label a:hover {
+    text-decoration: underline;
+}
+
+/* Button */
+.btn-block {
+    width: 100%;
+    justify-content: center;
+    padding: 14px;
+    font-size: 1rem;
+    margin-top: 8px;
+}
+
+.btn-block i {
+    width: 20px;
+    height: 20px;
+}
+
+/* Footer */
+.register-footer {
+    text-align: center;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.register-footer a {
+    color: var(--primary, #4A6FA5);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.register-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Benefits Section */
+.register-benefits {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.register-benefits h4 {
+    font-size: 1rem;
+    margin-bottom: 16px;
+    text-align: center;
+    color: var(--text, #2D3E50);
+}
+
+.benefits-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.benefit-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.875rem;
+    color: var(--text-light, #6B7280);
+}
+
+.benefit-item i {
+    width: 18px;
+    height: 18px;
+    color: #86A789;
+    flex-shrink: 0;
+}
+
+/* Error States */
+.input-icon input:invalid:focus,
+.input-icon select:invalid:focus {
+    border-color: #E27C7C;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .register-page {
+        padding: 80px 0 60px;
+    }
+    
+    .register-card {
+        padding: 28px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+    
+    .register-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .benefits-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .benefit-item {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .register-card {
+        padding: 20px;
+    }
+    
+    .input-icon input,
+    .input-icon select {
+        padding: 10px 10px 10px 38px;
+        font-size: 0.875rem;
+    }
+    
+    .btn-block {
+        padding: 12px;
+    }
+}
+</style>
+{% endblock %}

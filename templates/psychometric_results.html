@@ -1,0 +1,1140 @@
+    <!-- templates/psychometric_results.html -->
+{% extends "base.html" %}
+
+{% block title %}Your Complete Psychometric Profile & Career Matches - CareerGuide AI{% endblock %}
+
+{% block content %}
+<section class="results-section">
+    <div class="container">
+        <div class="results-header">
+            <h1>Your Comprehensive Psychometric Profile</h1>
+            <p>Based on your responses to all 60 questions, here's your complete analysis with top career matches from 300+ careers</p>
+            <div class="report-date">Report Generated: <span id="reportDate"></span></div>
+        </div>
+
+        <!-- Quick Navigation -->
+        <div class="quick-nav">
+            <button onclick="scrollToSection('personality')">Personality</button>
+            <button onclick="scrollToSection('interests')">Interests</button>
+            <button onclick="scrollToSection('aptitudes')">Aptitudes</button>
+            <button onclick="scrollToSection('workstyle')">Work Style</button>
+            <button onclick="scrollToSection('values')">Values</button>
+            <button onclick="scrollToSection('careers')">Career Matches</button>
+        </div>
+
+        <!-- Personality Profile Section -->
+        <div id="personality" class="result-card">
+            <h2><i data-feather="user"></i> Big 5 Personality Profile</h2>
+            <div class="personality-grid">
+                <div class="personality-chart-container">
+                    <canvas id="personalityChart"></canvas>
+                </div>
+                <div class="personality-insights" id="personalityInsights"></div>
+            </div>
+        </div>
+
+        <!-- RIASEC Interest Profile -->
+        <div id="interests" class="result-card">
+            <h2><i data-feather="heart"></i> RIASEC Interest Profile</h2>
+            <div class="riasec-grid">
+                <div class="riasec-chart-container">
+                    <canvas id="riasecChart"></canvas>
+                </div>
+                <div class="riasec-insights" id="riasecInsights"></div>
+            </div>
+        </div>
+
+        <!-- Aptitude Assessment -->
+        <div id="aptitudes" class="result-card">
+            <h2><i data-feather="brain"></i> Aptitude Assessment</h2>
+            <div class="aptitude-grid">
+                <div class="aptitude-chart-container">
+                    <canvas id="aptitudeChart"></canvas>
+                </div>
+                <div class="aptitude-insights" id="aptitudeInsights"></div>
+            </div>
+        </div>
+
+        <!-- Work Style Preferences -->
+        <div id="workstyle" class="result-card">
+            <h2><i data-feather="briefcase"></i> Work Style Preferences</h2>
+            <div class="workstyle-chart-container">
+                <canvas id="workstyleChart"></canvas>
+            </div>
+            <div id="workstyleInsights"></div>
+        </div>
+
+        <!-- Core Values -->
+        <div id="values" class="result-card">
+            <h2><i data-feather="compass"></i> Core Values</h2>
+            <div class="values-chart-container">
+                <canvas id="valuesChart"></canvas>
+            </div>
+            <div id="valuesInsights"></div>
+        </div>
+
+        <!-- Top Career Matches -->
+        <div id="careers" class="result-card">
+            <h2><i data-feather="target"></i> Your Top Career Matches</h2>
+            <p class="section-desc">Based on your complete psychometric profile, here are the careers that best match your personality, interests, aptitudes, work style, and values.</p>
+            <div id="careerMatches" class="career-matches-grid"></div>
+        </div>
+
+        <!-- All Career Matches (Filtered) -->
+        <div class="result-card">
+            <h2><i data-feather="list"></i> All Career Matches</h2>
+            <div class="match-filters">
+                <input type="text" id="matchSearch" placeholder="Search careers..." class="search-input">
+                <select id="matchCategoryFilter">
+                    <option value="all">All Categories</option>
+                </select>
+                <select id="matchScoreFilter">
+                    <option value="all">All Match Scores</option>
+                    <option value="90">90%+ (Excellent Match)</option>
+                    <option value="80">80%+ (Strong Match)</option>
+                    <option value="70">70%+ (Good Match)</option>
+                    <option value="60">60%+ (Potential Match)</option>
+                </select>
+            </div>
+            <div id="allCareerMatches" class="all-careers-grid"></div>
+            <div id="pagination" class="pagination"></div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button onclick="downloadFullReport()" class="btn btn-primary">
+                <i data-feather="download"></i> Download Full Report
+            </button>
+            <button onclick="shareResults()" class="btn btn-outline">
+                <i data-feather="share-2"></i> Share Results
+            </button>
+            <button onclick="window.print()" class="btn btn-outline">
+                <i data-feather="printer"></i> Print Report
+            </button>
+            <a href="/psychometric-test" class="btn btn-outline">
+                <i data-feather="refresh-cw"></i> Retake Test
+            </a>
+        </div>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let results = null;
+let allCareers = [];
+let filteredCareers = [];
+let currentPage = 1;
+const careersPerPage = 12;
+
+document.getElementById('reportDate').textContent = new Date().toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+});
+
+document.addEventListener('DOMContentLoaded', async function() {
+    const storedResults = sessionStorage.getItem('psychometricResults');
+    if (storedResults) {
+        results = JSON.parse(storedResults);
+        await loadAllCareers();
+        renderAllResults();
+    } else {
+        window.location.href = '/psychometric-test';
+    }
+});
+
+async function loadAllCareers() {
+    try {
+        const response = await fetch('/api/all-careers');
+        allCareers = await response.json();
+        
+        // Populate category filter
+        const categories = [...new Set(allCareers.map(c => c.Category))];
+        const categorySelect = document.getElementById('matchCategoryFilter');
+        categories.sort().forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            categorySelect.appendChild(option);
+        });
+        
+        // Calculate match scores for all careers
+        allCareers = allCareers.map(career => ({
+            ...career,
+            match_score: calculateCareerMatchScore(career, results)
+        }));
+        
+        // Sort by match score
+        allCareers.sort((a, b) => b.match_score - a.match_score);
+        
+        renderAllCareerMatches();
+    } catch (error) {
+        console.error('Error loading careers:', error);
+    }
+}
+
+function calculateCareerMatchScore(career, results) {
+    let score = 0;
+    let totalWeight = 0;
+    
+    // 1. Personality Match (25% weight)
+    if (results.personality) {
+        const personalityWeight = 25;
+        let personalityScore = 0;
+        
+        const personalityTraits = {
+            extraversion: ['Sales', 'Management', 'Marketing', 'Public Relations', 'Hospitality'],
+            agreeableness: ['Healthcare', 'Social Work', 'Counseling', 'Education', 'HR'],
+            conscientiousness: ['Engineering', 'Finance', 'Research', 'Law', 'Accounting'],
+            openness: ['Arts', 'Design', 'Research', 'Writing', 'Entrepreneurship'],
+            neuroticism: ['Creative', 'Therapy', 'Counseling']
+        };
+        
+        Object.entries(personalityTraits).forEach(([trait, keywords]) => {
+            const traitScore = results.personality[trait] || 3;
+            const careerCategory = career.Category;
+            const careerName = career.Career_Name.toLowerCase();
+            
+            keywords.forEach(keyword => {
+                if (careerCategory.includes(keyword) || careerName.includes(keyword.toLowerCase())) {
+                    personalityScore += traitScore * 5;
+                }
+            });
+        });
+        
+        score += (personalityScore / 125) * personalityWeight;
+        totalWeight += personalityWeight;
+    }
+    
+    // 2. Interest Match (RIASEC) (25% weight)
+    if (results.interests) {
+        const interestWeight = 25;
+        let interestScore = 0;
+        
+        const riasecMapping = {
+            realistic: ['Engineering', 'Skilled Trades', 'Construction', 'Manufacturing', 'Automobile'],
+            investigative: ['Research', 'Science', 'Technology', 'Data', 'Analysis', 'Healthcare'],
+            artistic: ['Arts', 'Design', 'Media', 'Writing', 'Creative', 'Animation'],
+            social: ['Education', 'Healthcare', 'Social Work', 'Counseling', 'HR'],
+            enterprising: ['Management', 'Business', 'Sales', 'Marketing', 'Law', 'Entrepreneurship'],
+            conventional: ['Finance', 'Accounting', 'Administration', 'Banking', 'Retail']
+        };
+        
+        Object.entries(riasecMapping).forEach(([type, keywords]) => {
+            const typeScore = results.interests[type] || 3;
+            const careerCategory = career.Category;
+            const careerName = career.Career_Name.toLowerCase();
+            
+            keywords.forEach(keyword => {
+                if (careerCategory.includes(keyword) || careerName.includes(keyword.toLowerCase())) {
+                    interestScore += typeScore * 5;
+                }
+            });
+        });
+        
+        score += (interestScore / 150) * interestWeight;
+        totalWeight += interestWeight;
+    }
+    
+    // 3. Aptitude Match (20% weight)
+    if (results.aptitudes) {
+        const aptitudeWeight = 20;
+        let aptitudeScore = 0;
+        
+        const aptitudeMapping = {
+            analytical: ['Data', 'Research', 'Engineering', 'Finance', 'Analysis', 'Scientist'],
+            creative: ['Design', 'Arts', 'Media', 'Writing', 'Creative', 'Animation'],
+            technical: ['Engineering', 'IT', 'Technology', 'Technical', 'Developer'],
+            interpersonal: ['HR', 'Management', 'Sales', 'Counseling', 'Teaching', 'Healthcare'],
+            organizational: ['Administration', 'Management', 'Project', 'Operations']
+        };
+        
+        Object.entries(aptitudeMapping).forEach(([apt, keywords]) => {
+            const aptScore = results.aptitudes[apt] || 3;
+            const careerCategory = career.Category;
+            const careerName = career.Career_Name.toLowerCase();
+            const keySkills = (career.Key_Technical_Skills || '').toLowerCase();
+            const softSkills = (career.Key_Soft_Skills || '').toLowerCase();
+            
+            keywords.forEach(keyword => {
+                if (careerCategory.includes(keyword) || careerName.includes(keyword.toLowerCase()) ||
+                    keySkills.includes(keyword.toLowerCase()) || softSkills.includes(keyword.toLowerCase())) {
+                    aptitudeScore += aptScore * 4;
+                }
+            });
+        });
+        
+        score += (aptitudeScore / 100) * aptitudeWeight;
+        totalWeight += aptitudeWeight;
+    }
+    
+    // 4. Work Style Match (15% weight)
+    if (results.workStyles) {
+        const workStyleWeight = 15;
+        let workStyleScore = 0;
+        
+        const workStyleMapping = {
+            flexibility: ['Remote', 'Freelance', 'Startup', 'Technology', 'IT'],
+            collaboration: ['Team', 'Management', 'HR', 'Education', 'Healthcare'],
+            stability: ['Government', 'Banking', 'Education', 'Accounting'],
+            financial_rewards: ['Finance', 'Investment', 'Sales', 'Management'],
+            learning: ['Research', 'Technology', 'Science', 'Education'],
+            social_impact: ['Social Work', 'Healthcare', 'Education', 'NGO']
+        };
+        
+        Object.entries(workStyleMapping).forEach(([style, keywords]) => {
+            const styleScore = results.workStyles[style] || 3;
+            const careerCategory = career.Category;
+            
+            keywords.forEach(keyword => {
+                if (careerCategory.includes(keyword)) {
+                    workStyleScore += styleScore * 4;
+                }
+            });
+        });
+        
+        score += (workStyleScore / 120) * workStyleWeight;
+        totalWeight += workStyleWeight;
+    }
+    
+    // 5. Values Match (15% weight)
+    if (results.values) {
+        const valuesWeight = 15;
+        let valuesScore = 0;
+        
+        const valuesMapping = {
+            security: ['Government', 'Banking', 'Accounting', 'Stable'],
+            altruism: ['Healthcare', 'Social Work', 'Education', 'NGO'],
+            prestige: ['Management', 'Law', 'Medicine', 'Executive'],
+            creativity: ['Arts', 'Design', 'Media', 'Creative'],
+            autonomy: ['Entrepreneur', 'Freelance', 'Consultant'],
+            growth: ['Technology', 'Research', 'Innovation']
+        };
+        
+        Object.entries(valuesMapping).forEach(([value, keywords]) => {
+            const valueScore = results.values[value] || 3;
+            const careerCategory = career.Category;
+            
+            keywords.forEach(keyword => {
+                if (careerCategory.includes(keyword)) {
+                    valuesScore += valueScore * 4;
+                }
+            });
+        });
+        
+        score += (valuesScore / 120) * valuesWeight;
+        totalWeight += valuesWeight;
+    }
+    
+    // Calculate final percentage
+    const finalScore = totalWeight > 0 ? (score / totalWeight) * 100 : 50;
+    return Math.min(99, Math.max(1, Math.round(finalScore)));
+}
+
+function renderAllResults() {
+    renderPersonalityChart();
+    renderRIASECChart();
+    renderAptitudeChart();
+    renderWorkStyleChart();
+    renderValuesChart();
+    renderPersonalityInsights();
+    renderRIASECInsights();
+    renderAptitudeInsights();
+    renderWorkStyleInsights();
+    renderValuesInsights();
+    renderTopCareerMatches();
+}
+
+function renderPersonalityChart() {
+    const ctx = document.getElementById('personalityChart').getContext('2d');
+    const p = results.personality;
+    
+    new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Extraversion', 'Agreeableness', 'Conscientiousness', 'Emotional Stability', 'Openness to Experience'],
+            datasets: [{
+                label: 'Your Personality Profile',
+                data: [p.extraversion * 20, p.agreeableness * 20, p.conscientiousness * 20, 
+                       (6 - p.neuroticism) * 20, p.openness * 20],
+                backgroundColor: 'rgba(74, 111, 165, 0.2)',
+                borderColor: 'rgba(74, 111, 165, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(74, 111, 165, 1)',
+                pointBorderColor: '#fff',
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: { r: { beginAtZero: true, max: 100, ticks: { stepSize: 20 } } }
+        }
+    });
+}
+
+function renderPersonalityInsights() {
+    const p = results.personality;
+    let insights = '<div class="insight-card">';
+    
+    if (p.extraversion > 4) insights += '<p><strong>🎯 Extraverted:</strong> You thrive in social settings, enjoy collaboration, and gain energy from interacting with others.</p>';
+    else if (p.extraversion < 2) insights += '<p><strong>📚 Introverted:</strong> You prefer independent work, value deep focus, and recharge through solitude.</p>';
+    
+    if (p.agreeableness > 4) insights += '<p><strong>🤝 Highly Agreeable:</strong> You value harmony, are empathetic, and enjoy helping others succeed.</p>';
+    else if (p.agreeableness < 2) insights += '<p><strong>⚡ Challenging:</strong> You are direct, value honesty, and aren\'t afraid to question the status quo.</p>';
+    
+    if (p.conscientiousness > 4) insights += '<p><strong>📋 Conscientious:</strong> You are organized, reliable, and goal-oriented with strong attention to detail.</p>';
+    else if (p.conscientiousness < 2) insights += '<p><strong>🎨 Flexible:</strong> You prefer spontaneity, adaptability, and working in dynamic environments.</p>';
+    
+    if ((6 - p.neuroticism) > 4) insights += '<p><strong>😌 Emotionally Stable:</strong> You handle stress well, remain calm under pressure, and bounce back quickly.</p>';
+    else if ((6 - p.neuroticism) < 2) insights += '<p><strong>💭 Reflective:</strong> You are sensitive to your environment and may benefit from supportive work cultures.</p>';
+    
+    if (p.openness > 4) insights += '<p><strong>🎨 Open to Experience:</strong> You are creative, curious, and enjoy learning new things and exploring ideas.</p>';
+    else if (p.openness < 2) insights += '<p><strong>🏛️ Practical:</strong> You prefer concrete facts, established methods, and clear routines.</p>';
+    
+    insights += '</div>';
+    document.getElementById('personalityInsights').innerHTML = insights;
+}
+
+function renderRIASECChart() {
+    const ctx = document.getElementById('riasecChart').getContext('2d');
+    const i = results.interests;
+    
+    new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Realistic (Hands-on)', 'Investigative (Research)', 'Artistic (Creative)', 
+                     'Social (Helping)', 'Enterprising (Leading)', 'Conventional (Organizing)'],
+            datasets: [{
+                label: 'Your Interest Profile',
+                data: [i.realistic * 20, i.investigative * 20, i.artistic * 20, 
+                       i.social * 20, i.enterprising * 20, i.conventional * 20],
+                backgroundColor: 'rgba(232, 168, 124, 0.2)',
+                borderColor: 'rgba(232, 168, 124, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(232, 168, 124, 1)'
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: true, scales: { r: { beginAtZero: true, max: 100 } } }
+    });
+}
+
+function renderRIASECInsights() {
+    const i = results.interests;
+    const topInterests = Object.entries(i).sort((a,b) => b[1] - a[1]).slice(0, 3);
+    
+    let html = '<div class="insight-card"><h4>Your Top Interest Areas</h4><ul>';
+    topInterests.forEach(([interest, score]) => {
+        const descriptions = {
+            realistic: '🔧 Realistic - You enjoy hands-on work with tools, machines, and practical applications',
+            investigative: '🔬 Investigative - You enjoy research, analysis, and solving complex problems',
+            artistic: '🎨 Artistic - You enjoy creative expression through art, writing, or design',
+            social: '🤝 Social - You enjoy helping, teaching, and working closely with others',
+            enterprising: '💼 Enterprising - You enjoy leading, persuading, and influencing others',
+            conventional: '📊 Conventional - You enjoy organized, structured work with clear procedures'
+        };
+        html += `<li><strong>${interest.charAt(0).toUpperCase() + interest.slice(1)}:</strong> ${descriptions[interest]}</li>`;
+    });
+    html += '</ul></div>';
+    document.getElementById('riasecInsights').innerHTML = html;
+}
+
+function renderAptitudeChart() {
+    const ctx = document.getElementById('aptitudeChart').getContext('2d');
+    const a = results.aptitudes;
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Analytical', 'Creative', 'Technical', 'Interpersonal', 'Organizational'],
+            datasets: [{
+                label: 'Your Aptitude Level',
+                data: [a.analytical * 20, a.creative * 20, a.technical * 20, a.interpersonal * 20, a.organizational * 20],
+                backgroundColor: 'rgba(134, 167, 137, 0.8)',
+                borderColor: 'rgba(134, 167, 137, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: 'Proficiency Level (%)' } } }
+        }
+    });
+}
+
+function renderAptitudeInsights() {
+    const a = results.aptitudes;
+    const topAptitude = Object.entries(a).sort((a,b) => b[1] - a[1])[0];
+    
+    const descriptions = {
+        analytical: '🧮 Analytical Thinking - You excel at data analysis, logical reasoning, and problem-solving',
+        creative: '🎨 Creative Thinking - You excel at innovation, design, and thinking outside the box',
+        technical: '⚙️ Technical Skills - You excel at working with tools, machines, and technology',
+        interpersonal: '👥 Interpersonal Skills - You excel at communication, teamwork, and relationship building',
+        organizational: '📋 Organizational Skills - You excel at planning, coordination, and attention to detail'
+    };
+    
+    let html = `<div class="insight-card"><p><strong>Your Strongest Aptitude:</strong> ${descriptions[topAptitude[0]]}</p>`;
+    html += `<p>Your ${topAptitude[0]} skills are your greatest strength. Consider careers that leverage this ability.</p>`;
+    html += '<p><strong>Career Paths that match your aptitudes:</strong> ';
+    
+    if (a.analytical > 4) html += 'Data Science, Research, Engineering, Finance, Analytics • ';
+    if (a.creative > 4) html += 'Design, Arts, Media, Marketing, Innovation • ';
+    if (a.technical > 4) html += 'IT, Engineering, Skilled Trades, Manufacturing • ';
+    if (a.interpersonal > 4) html += 'Management, HR, Sales, Education, Healthcare • ';
+    if (a.organizational > 4) html += 'Project Management, Administration, Operations';
+    html += '</p></div>';
+    
+    document.getElementById('aptitudeInsights').innerHTML = html;
+}
+
+function renderWorkStyleChart() {
+    const ctx = document.getElementById('workstyleChart').getContext('2d');
+    const w = results.workStyles;
+    
+    new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Flexibility', 'Collaboration', 'Stability', 'Travel', 'Work-Life Balance', 'Financial Rewards', 'Learning', 'Social Impact'],
+            datasets: [{
+                label: 'Work Style Preferences',
+                data: [w.flexibility * 20, w.collaboration * 20, w.stability * 20, w.travel * 20,
+                       w.work_life_balance * 20, w.financial_rewards * 20, w.learning * 20, w.social_impact * 20],
+                backgroundColor: 'rgba(107, 140, 158, 0.2)',
+                borderColor: 'rgba(107, 140, 158, 1)',
+                borderWidth: 2
+            }]
+        },
+        options: { responsive: true, scales: { r: { beginAtZero: true, max: 100 } } }
+    });
+}
+
+function renderWorkStyleInsights() {
+    const w = results.workStyles;
+    const topPreferences = Object.entries(w).sort((a,b) => b[1] - a[1]).slice(0, 3);
+    
+    let html = '<div class="insight-card"><h4>Your Top Work Preferences</h4><ul>';
+    topPreferences.forEach(([pref, score]) => {
+        const descriptions = {
+            flexibility: '🔄 Flexibility - You value adaptable schedules and remote work options',
+            collaboration: '👥 Collaboration - You thrive in team-oriented environments',
+            stability: '🏛️ Stability - You prefer predictable routines and job security',
+            travel: '✈️ Travel - You enjoy opportunities to travel for work',
+            work_life_balance: '⚖️ Work-Life Balance - You prioritize balance between work and personal life',
+            financial_rewards: '💰 Financial Rewards - You value competitive compensation and bonuses',
+            learning: '📚 Learning - You seek continuous growth and development opportunities',
+            social_impact: '🌍 Social Impact - You want to make a positive difference in society'
+        };
+        html += `<li><strong>${descriptions[pref]}</strong> - ${Math.round(score * 20)}% importance</li>`;
+    });
+    html += '</ul></div>';
+    document.getElementById('workstyleInsights').innerHTML = html;
+}
+
+function renderValuesChart() {
+    const ctx = document.getElementById('valuesChart').getContext('2d');
+    const v = results.value_data;
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Security', 'Altruism', 'Prestige', 'Creativity', 'Autonomy', 'Growth', 'Balance', 'Sustainability', 'Justice'],
+            datasets: [{
+                label: 'Value Importance',
+                data: [v.security * 20, v.altruism * 20, v.prestige * 20, v.creativity * 20,
+                       v.autonomy * 20, v.growth * 20, v.balance * 20, v.sustainability * 20, v.justice * 20],
+                backgroundColor: 'rgba(74, 111, 165, 0.8)',
+                borderColor: 'rgba(74, 111, 165, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: 'Importance Level (%)' } } }
+        }
+    });
+}
+
+function renderValuesInsights() {
+    const v = results.value_data;
+    const topValues = Object.entries(v).sort((a,b) => b[1] - a[1]).slice(0, 3);
+    
+    let html = '<div class="insight-card"><h4>Your Core Values</h4><ul>';
+    topValues.forEach(([value, score]) => {
+        const descriptions = {
+            security: '🔒 Financial Security - Stability and financial well-being matter to you',
+            altruism: '🤝 Altruism - Helping others and making a difference drives you',
+            prestige: '🏆 Prestige - Recognition and status are important motivators',
+            creativity: '🎨 Creativity - Self-expression and innovation fuel your passion',
+            autonomy: '🔓 Autonomy - Independence and freedom guide your decisions',
+            growth: '📈 Growth - Continuous learning and development are essential',
+            balance: '⚖️ Balance - Harmony between work and personal life is key',
+            sustainability: '🌱 Sustainability - Environmental responsibility matters to you',
+            justice: '⚖️ Justice - Fairness and equality guide your actions'
+        };
+        html += `<li><strong>${descriptions[value]}</strong></li>`;
+    });
+    html += '</ul><p>Careers that align with these values will bring you greater satisfaction and fulfillment.</p></div>';
+    document.getElementById('valuesInsights').innerHTML = html;
+}
+
+function renderTopCareerMatches() {
+    const topMatches = allCareers.slice(0, 6);
+    const container = document.getElementById('careerMatches');
+    
+    container.innerHTML = topMatches.map(career => `
+        <div class="career-match-card">
+            <div class="match-header">
+                <h3>${escapeHtml(career.Career_Name)}</h3>
+                <span class="match-score ${getMatchScoreClass(career.match_score)}">${career.match_score}% Match</span>
+            </div>
+            <p class="career-category">${escapeHtml(career.Category)}</p>
+            <div class="match-details">
+                <div><i data-feather="book-open"></i> ${escapeHtml(career.Min_Education)}</div>
+                <div><i data-feather="trending-up"></i> ${escapeHtml(career.Entry_Salary_LPA)} LPA</div>
+                <div><i data-feather="briefcase"></i> ${escapeHtml(career.Job_Outlook)}</div>
+            </div>
+            <div class="match-skills">
+                <strong>Key Skills:</strong> ${escapeHtml((career.Key_Technical_Skills || '').split(',').slice(0, 3).join(', '))}
+            </div>
+            <a href="/career/${career.Career_ID}" class="btn btn-small btn-primary">Explore Career</a>
+        </div>
+    `).join('');
+    
+    feather.replace();
+}
+
+function renderAllCareerMatches() {
+    const searchTerm = document.getElementById('matchSearch')?.value.toLowerCase() || '';
+    const categoryFilter = document.getElementById('matchCategoryFilter')?.value || 'all';
+    const scoreFilter = document.getElementById('matchScoreFilter')?.value || 'all';
+    
+    filteredCareers = allCareers.filter(career => {
+        if (searchTerm && !career.Career_Name.toLowerCase().includes(searchTerm) && 
+            !(career.Key_Technical_Skills || '').toLowerCase().includes(searchTerm)) return false;
+        if (categoryFilter !== 'all' && career.Category !== categoryFilter) return false;
+        if (scoreFilter !== 'all' && career.match_score < parseInt(scoreFilter)) return false;
+        return true;
+    });
+    
+    const start = (currentPage - 1) * careersPerPage;
+    const paginatedCareers = filteredCareers.slice(start, start + careersPerPage);
+    const container = document.getElementById('allCareerMatches');
+    
+    if (paginatedCareers.length === 0) {
+        container.innerHTML = '<div class="no-results">No careers found matching your filters.</div>';
+        return;
+    }
+    
+    container.innerHTML = paginatedCareers.map(career => `
+        <div class="career-match-small">
+            <div class="match-info">
+                <h4>${escapeHtml(career.Career_Name)}</h4>
+                <span class="career-category-small">${escapeHtml(career.Category)}</span>
+                <span class="match-score-small ${getMatchScoreClass(career.match_score)}">${career.match_score}%</span>
+            </div>
+            <a href="/career/${career.Career_ID}" class="btn btn-small btn-outline">View</a>
+        </div>
+    `).join('');
+    
+    renderPagination();
+    feather.replace();
+}
+
+function renderPagination() {
+    const totalPages = Math.ceil(filteredCareers.length / careersPerPage);
+    const paginationDiv = document.getElementById('pagination');
+    
+    if (totalPages <= 1) {
+        paginationDiv.innerHTML = '';
+        return;
+    }
+    
+    let html = '<div class="pagination-controls">';
+    html += `<button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
+    
+    for (let i = 1; i <= Math.min(totalPages, 7); i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+            html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+        } else if (i === currentPage - 3 || i === currentPage + 3) {
+            html += '<span class="page-dots">...</span>';
+        }
+    }
+    
+    html += `<button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+    html += '</div>';
+    paginationDiv.innerHTML = html;
+}
+
+function changePage(page) {
+    currentPage = page;
+    renderAllCareerMatches();
+    window.scrollTo({ top: document.getElementById('allCareerMatches').offsetTop - 100, behavior: 'smooth' });
+}
+
+function getMatchScoreClass(score) {
+    if (score >= 90) return 'excellent';
+    if (score >= 80) return 'strong';
+    if (score >= 70) return 'good';
+    if (score >= 60) return 'potential';
+    return 'low';
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function scrollToSection(sectionId) {
+    document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+}
+
+function downloadFullReport() {
+    const reportHtml = generateFullReport();
+    const blob = new Blob([reportHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `psychometric_report_${new Date().toISOString().split('T')[0]}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function generateFullReport() {
+    return `<!DOCTYPE html>
+    <html>
+    <head><title>Psychometric Assessment Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+        h1 { color: #4A6FA5; }
+        .section { margin-bottom: 30px; page-break-inside: avoid; }
+        .match-score { display: inline-block; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+        .excellent { background: #d4edda; color: #155724; }
+        .strong { background: #d1ecf1; color: #0c5460; }
+        .good { background: #fff3cd; color: #856404; }
+        @media print { body { margin: 0; } .no-print { display: none; } }
+    </style>
+    </head>
+    <body>
+        <h1>Comprehensive Psychometric Assessment Report</h1>
+        <p>Generated on: ${new Date().toLocaleDateString()}</p>
+        <div class="section">${document.getElementById('personalityInsights').innerHTML}</div>
+        <div class="section">${document.getElementById('riasecInsights').innerHTML}</div>
+        <div class="section">${document.getElementById('aptitudeInsights').innerHTML}</div>
+        <div class="section">${document.getElementById('workstyleInsights').innerHTML}</div>
+        <div class="section">${document.getElementById('valuesInsights').innerHTML}</div>
+        <div class="section"><h2>Top Career Matches</h2>${document.getElementById('careerMatches').innerHTML}</div>
+        <p>For more details, visit CareerGuide AI.</p>
+    </body>
+    </html>`;
+}
+
+function shareResults() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'My Psychometric Assessment Results',
+            text: `My top career match is ${allCareers[0]?.Career_Name} with ${allCareers[0]?.match_score}% match!`,
+            url: window.location.href
+        });
+    } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+    }
+}
+
+// Add event listeners for filters
+document.getElementById('matchSearch')?.addEventListener('input', () => {
+    currentPage = 1;
+    renderAllCareerMatches();
+});
+document.getElementById('matchCategoryFilter')?.addEventListener('change', () => {
+    currentPage = 1;
+    renderAllCareerMatches();
+});
+document.getElementById('matchScoreFilter')?.addEventListener('change', () => {
+    currentPage = 1;
+    renderAllCareerMatches();
+});
+</script>
+
+<style>
+.results-section {
+    padding: 48px 0;
+    background: var(--bg, #F9F7F5);
+}
+
+.results-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.results-header h1 {
+    font-size: 2rem;
+    margin-bottom: 16px;
+}
+
+.report-date {
+    color: var(--text-light, #6B7280);
+    font-size: 0.875rem;
+    margin-top: 8px;
+}
+
+.quick-nav {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+}
+
+.quick-nav button {
+    padding: 8px 20px;
+    background: var(--surface, white);
+    border: 1px solid #e5e7eb;
+    border-radius: 40px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.3s;
+}
+
+.quick-nav button:hover {
+    background: var(--primary, #4A6FA5);
+    color: white;
+    border-color: var(--primary);
+}
+
+.result-card {
+    background: var(--surface, white);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 28px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+.result-card h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    font-size: 1.35rem;
+}
+
+.result-card h2 i {
+    width: 28px;
+    height: 28px;
+    color: var(--primary, #4A6FA5);
+}
+
+.personality-grid, .riasec-grid, .aptitude-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+}
+
+@media (max-width: 768px) {
+    .personality-grid, .riasec-grid, .aptitude-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.personality-chart-container, .riasec-chart-container, .aptitude-chart-container,
+.workstyle-chart-container, .values-chart-container {
+    max-width: 450px;
+    margin: 0 auto;
+}
+
+.insight-card {
+    background: var(--bg, #F9F7F5);
+    padding: 20px;
+    border-radius: 16px;
+}
+
+.insight-card h4 {
+    margin-bottom: 12px;
+    color: var(--primary, #4A6FA5);
+}
+
+.insight-card ul {
+    margin-left: 20px;
+}
+
+.insight-card li {
+    margin: 8px 0;
+}
+
+.career-matches-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.career-match-card {
+    background: var(--bg, #F9F7F5);
+    border-radius: 16px;
+    padding: 20px;
+    transition: all 0.3s;
+}
+
+.career-match-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.match-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.match-header h3 {
+    margin: 0;
+    font-size: 1.125rem;
+}
+
+.match-score {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.match-score.excellent { background: #d4edda; color: #155724; }
+.match-score.strong { background: #d1ecf1; color: #0c5460; }
+.match-score.good { background: #fff3cd; color: #856404; }
+.match-score.potential { background: #cfe2ff; color: #004085; }
+
+.career-category {
+    color: var(--secondary, #6B8C9E);
+    font-size: 0.875rem;
+    margin-bottom: 12px;
+}
+
+.match-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 12px 0;
+    font-size: 0.875rem;
+}
+
+.match-details div {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.match-details i {
+    width: 16px;
+    height: 16px;
+}
+
+.match-skills {
+    font-size: 0.75rem;
+    color: var(--text-light, #6B7280);
+    margin: 12px 0;
+    padding: 8px 0;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.all-careers-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.career-match-small {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--bg, #F9F7F5);
+    border-radius: 12px;
+    transition: all 0.3s;
+}
+
+.career-match-small:hover {
+    background: rgba(74, 111, 165, 0.05);
+}
+
+.match-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.match-info h4 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.career-category-small {
+    font-size: 0.75rem;
+    color: var(--secondary, #6B8C9E);
+    padding: 2px 8px;
+    background: rgba(107, 140, 158, 0.1);
+    border-radius: 12px;
+}
+
+.match-score-small {
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.match-filters {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 40px;
+    font-family: inherit;
+}
+
+.match-filters select {
+    padding: 10px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 40px;
+    font-family: inherit;
+    background: white;
+}
+
+.pagination {
+    text-align: center;
+    margin-top: 24px;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.page-btn {
+    padding: 8px 16px;
+    background: var(--surface, white);
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: var(--primary, #4A6FA5);
+    color: white;
+    border-color: var(--primary);
+}
+
+.page-btn.active {
+    background: var(--primary, #4A6FA5);
+    color: white;
+    border-color: var(--primary);
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 12px 28px;
+    border-radius: 40px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: var(--primary, #4A6FA5);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #3a5a8a;
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--primary, #4A6FA5);
+    color: var(--primary, #4A6FA5);
+}
+
+.btn-outline:hover {
+    background: var(--primary, #4A6FA5);
+    color: white;
+}
+
+.btn-small {
+    padding: 6px 16px;
+    font-size: 0.875rem;
+}
+
+.no-results {
+    text-align: center;
+    padding: 48px;
+    color: var(--text-light, #6B7280);
+}
+
+@media (max-width: 768px) {
+    .result-card {
+        padding: 20px;
+    }
+    
+    .match-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .career-match-small {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .match-filters {
+        flex-direction: column;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}

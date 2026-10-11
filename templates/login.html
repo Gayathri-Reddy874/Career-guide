@@ -1,0 +1,276 @@
+<!-- templates/login.html -->
+{% extends "base.html" %}
+
+{% block title %}Login - CareerGuide AI{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="container">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <i data-feather="log-in"></i>
+                    <h2>Welcome Back</h2>
+                    <p>Login to continue your career journey</p>
+                </div>
+                
+                <form method="POST" class="login-form">
+                    <div class="form-group">
+                        <label for="username">Username or Email</label>
+                        <div class="input-icon">
+                            <i data-feather="user"></i>
+                            <input type="text" id="username" name="username" required placeholder="Enter your username or email">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-icon">
+                            <i data-feather="lock"></i>
+                            <input type="password" id="password" name="password" required placeholder="Enter your password">
+                        </div>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="remember">
+                            <span>Remember me</span>
+                        </label>
+                        <a href="/forgot-password" class="forgot-link">Forgot Password?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i data-feather="log-in"></i>
+                        Sign In
+                    </button>
+                </form>
+                
+                <div class="login-footer">
+                    <p>Don't have an account? <a href="/register">Create an account</a></p>
+                </div>
+                
+                <div class="demo-credentials">
+                    <p><strong>Demo Credentials:</strong></p>
+                    <div class="demo-box">
+                        <span>Username: <strong>admin</strong></span>
+                        <span>Password: <strong>admin123</strong></span>
+                    </div>
+                    <p class="demo-note">(For testing purposes only)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.login-page {
+    padding: 120px 0 80px;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--bg, #F9F7F5) 0%, #f0f0f0 100%);
+}
+
+.login-container {
+    max-width: 450px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.login-card {
+    background: var(--surface, white);
+    border-radius: 28px;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.login-header i {
+    width: 56px;
+    height: 56px;
+    color: var(--primary, #4A6FA5);
+    margin-bottom: 16px;
+}
+
+.login-header h2 {
+    font-size: 1.75rem;
+    margin-bottom: 8px;
+    color: var(--text, #2D3E50);
+}
+
+.login-header p {
+    color: var(--text-light, #6B7280);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: var(--text, #2D3E50);
+}
+
+.input-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon i {
+    position: absolute;
+    left: 14px;
+    width: 18px;
+    height: 18px;
+    color: var(--text-light, #6B7280);
+    pointer-events: none;
+}
+
+.input-icon input {
+    width: 100%;
+    padding: 12px 12px 12px 42px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    background: var(--surface, white);
+}
+
+.input-icon input:focus {
+    outline: none;
+    border-color: var(--primary, #4A6FA5);
+    box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.1);
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--text-light, #6B7280);
+}
+
+.checkbox-label input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.forgot-link {
+    color: var(--primary, #4A6FA5);
+    text-decoration: none;
+    font-size: 0.875rem;
+}
+
+.forgot-link:hover {
+    text-decoration: underline;
+}
+
+.btn-block {
+    width: 100%;
+    justify-content: center;
+    padding: 14px;
+    font-size: 1rem;
+}
+
+.btn-block i {
+    width: 20px;
+    height: 20px;
+}
+
+.login-footer {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.login-footer a {
+    color: var(--primary, #4A6FA5);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.login-footer a:hover {
+    text-decoration: underline;
+}
+
+.demo-credentials {
+    margin-top: 24px;
+    padding: 16px;
+    background: var(--bg, #F9F7F5);
+    border-radius: 16px;
+    text-align: center;
+}
+
+.demo-credentials p {
+    font-size: 0.875rem;
+    margin-bottom: 8px;
+}
+
+.demo-box {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    padding: 8px;
+    background: var(--surface, white);
+    border-radius: 12px;
+    font-size: 0.875rem;
+}
+
+.demo-box strong {
+    color: var(--primary, #4A6FA5);
+}
+
+.demo-note {
+    font-size: 0.7rem;
+    color: var(--text-light, #6B7280);
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+    .login-page {
+        padding: 100px 0 60px;
+    }
+    
+    .login-card {
+        padding: 28px;
+    }
+    
+    .login-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .demo-box {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+</style>
+{% endblock %}

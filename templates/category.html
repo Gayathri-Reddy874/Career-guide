@@ -1,0 +1,896 @@
+<!-- templates/category.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ category }} Careers - CareerGuide AI{% endblock %}
+
+{% block content %}
+<section class="category-page">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="/">Home</a>
+            <span class="separator">/</span>
+            <span class="current">{{ category }}</span>
+        </div>
+
+        <!-- Category Header -->
+        <div class="category-header">
+            <div class="category-icon-large">
+                {% if category == 'Healthcare' %}
+                    <i data-feather="heart"></i>
+                {% elif category == 'Information Technology' %}
+                    <i data-feather="cpu"></i>
+                {% elif category == 'Core Engineering' %}
+                    <i data-feather="tool"></i>
+                {% elif category == 'Emerging Technologies' %}
+                    <i data-feather="zap"></i>
+                {% elif category == 'Management' %}
+                    <i data-feather="briefcase"></i>
+                {% elif category == 'Banking Finance' %}
+                    <i data-feather="trending-up"></i>
+                {% elif category == 'Government' %}
+                    <i data-feather="shield"></i>
+                {% elif category == 'Defence' %}
+                    <i data-feather="flag"></i>
+                {% elif category == 'Education' %}
+                    <i data-feather="book-open"></i>
+                {% elif category == 'Law' %}
+                    <i data-feather="scale"></i>
+                {% elif category == 'Media' %}
+                    <i data-feather="mic"></i>
+                {% elif category == 'Arts' %}
+                    <i data-feather="palette"></i>
+                {% elif category == 'Entertainment' %}
+                    <i data-feather="film"></i>
+                {% elif category == 'Skilled Trades' %}
+                    <i data-feather="wrench"></i>
+                {% elif category == 'Agriculture' %}
+                    <i data-feather="sun"></i>
+                {% elif category == 'Hospitality' %}
+                    <i data-feather="coffee"></i>
+                {% elif category == 'Sports' %}
+                    <i data-feather="award"></i>
+                {% elif category == 'Social Work' %}
+                    <i data-feather="users"></i>
+                {% elif category == 'Science' %}
+                    <i data-feather="globe"></i>
+                {% elif category == 'Retail' %}
+                    <i data-feather="shopping-bag"></i>
+                {% else %}
+                    <i data-feather="star"></i>
+                {% endif %}
+            </div>
+            <h1>{{ category }} Careers</h1>
+            <p class="category-description" id="categoryDescription">Loading category information...</p>
+            <div class="category-stats">
+                <span class="stat" id="careerCount">0 Careers</span>
+                <span class="stat" id="avgSalary">Avg Salary: -</span>
+                <span class="stat" id="topOutlook">Outlook: -</span>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label>Education Level</label>
+                    <select id="educationFilter">
+                        <option value="all">All Levels</option>
+                        <option value="10+2">10+2 / High School</option>
+                        <option value="Diploma">Diploma</option>
+                        <option value="Bachelor's">Bachelor's Degree</option>
+                        <option value="Master's">Master's Degree</option>
+                        <option value="PG Degree">PG Degree</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Salary Range (LPA)</label>
+                    <select id="salaryFilter">
+                        <option value="all">All Salaries</option>
+                        <option value="0-3">Below 3 LPA</option>
+                        <option value="3-5">3 - 5 LPA</option>
+                        <option value="5-8">5 - 8 LPA</option>
+                        <option value="8-12">8 - 12 LPA</option>
+                        <option value="12+">12+ LPA</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Job Outlook</label>
+                    <select id="outlookFilter">
+                        <option value="all">All Outlooks</option>
+                        <option value="Excellent">Excellent</option>
+                        <option value="Growing">Growing</option>
+                        <option value="Good">Good</option>
+                        <option value="Stable">Stable</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Sort By</label>
+                    <select id="sortFilter">
+                        <option value="name">Name (A-Z)</option>
+                        <option value="salary_high">Salary (High to Low)</option>
+                        <option value="salary_low">Salary (Low to High)</option>
+                        <option value="duration">Duration (Shortest)</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group search-group">
+                    <label>Search</label>
+                    <input type="text" id="searchFilter" placeholder="Search careers..." class="search-input">
+                </div>
+            </div>
+        </div>
+
+        <!-- Career Grid -->
+        <div class="careers-grid" id="careersGrid">
+            <div class="loading-spinner">
+                <i data-feather="loader"></i>
+                <p>Loading careers...</p>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination"></div>
+
+        <!-- Call to Action for Non-Logged In Users -->
+        {% if not session.user_id %}
+        <div class="cta-signup">
+            <div class="cta-content">
+                <h3>Want Personalized Career Recommendations?</h3>
+                <p>Create a free account to save careers, track your progress, and get AI-powered guidance</p>
+                <div class="cta-buttons">
+                    <a href="/register" class="btn btn-primary">Sign Up Free</a>
+                    <a href="/login" class="btn btn-outline">Login</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+let allCareers = [];
+let currentPage = 1;
+const careersPerPage = 12;
+let currentFilters = {
+    education: 'all',
+    salary: 'all',
+    outlook: 'all',
+    sort: 'name',
+    search: ''
+};
+
+// Category descriptions
+const categoryDescriptions = {
+    'Healthcare': 'Healthcare careers focus on patient care, medical treatment, and wellness. These roles require strong scientific knowledge, empathy, and dedication to helping others.',
+    'Information Technology': 'IT careers involve software development, system administration, and emerging technologies. These roles require strong technical skills, problem-solving abilities, and continuous learning.',
+    'Core Engineering': 'Engineering careers focus on design, construction, and maintenance of systems and structures. These roles require analytical thinking, technical expertise, and practical problem-solving.',
+    'Emerging Technologies': 'Cutting-edge careers in AI, Machine Learning, Blockchain, and future technologies. These roles require innovation, adaptability, and passion for learning.',
+    'Management': 'Management careers involve leading teams, strategic planning, and business operations. These roles require leadership, communication skills, and business acumen.',
+    'Banking Finance': 'Finance careers focus on investments, banking operations, and financial analysis. These roles require analytical thinking, numerical skills, and attention to detail.',
+    'Government': 'Government careers offer stability and public service opportunities. These roles require integrity, dedication, and commitment to serving the nation.',
+    'Defence': 'Defence careers serve the nation through military and strategic roles. These roles require discipline, courage, and physical fitness.',
+    'Education': 'Education careers involve teaching, research, and academic administration. These roles require patience, communication skills, and passion for knowledge.',
+    'Law': 'Legal careers focus on justice, advocacy, and legal compliance. These roles require analytical thinking, argumentation skills, and attention to detail.',
+    'Media': 'Media careers involve content creation, journalism, and communication. These roles require creativity, storytelling ability, and strong writing skills.',
+    'Arts': 'Arts careers focus on creative expression, design, and visual communication. These roles require creativity, artistic skills, and visual thinking.',
+    'Entertainment': 'Entertainment careers involve performance, production, and creative arts. These roles require talent, dedication, and passion for the arts.',
+    'Skilled Trades': 'Skilled trades offer hands-on technical careers. These roles require practical skills, precision, and attention to detail.',
+    'Agriculture': 'Agriculture careers focus on farming, food production, and natural resources. These roles require environmental awareness and practical knowledge.',
+    'Hospitality': 'Hospitality careers involve customer service, event management, and tourism. These roles require people skills, organization, and attention to detail.',
+    'Sports': 'Sports careers focus on athletics, coaching, and sports management. These roles require physical fitness, teamwork, and dedication.',
+    'Social Work': 'Social work careers involve community service and social welfare. These roles require empathy, patience, and commitment to helping others.',
+    'Science': 'Science careers focus on research, discovery, and innovation. These roles require curiosity, analytical thinking, and scientific knowledge.',
+    'Retail': 'Retail careers involve sales, merchandising, and store operations. These roles require customer service skills and business understanding.'
+};
+
+// Load category data
+async function loadCategoryData() {
+    try {
+        const response = await fetch(`/api/category/${encodeURIComponent('{{ category }}')}`);
+        const careers = await response.json();
+        allCareers = careers;
+        
+        // Update stats
+        updateCategoryStats(careers);
+        
+        // Set description
+        const description = categoryDescriptions['{{ category }}'] || `Explore ${'{{ category }}'} careers with detailed information about education requirements, salary expectations, and job outlook.`;
+        document.getElementById('categoryDescription').textContent = description;
+        
+        // Apply filters and render
+        applyFiltersAndRender();
+        
+    } catch (error) {
+        console.error('Error loading careers:', error);
+        document.getElementById('careersGrid').innerHTML = `
+            <div class="error-message">
+                <i data-feather="alert-circle"></i>
+                <p>Failed to load careers. Please refresh the page.</p>
+            </div>
+        `;
+    }
+}
+
+function updateCategoryStats(careers) {
+    // Update career count
+    document.getElementById('careerCount').textContent = `${careers.length} Careers`;
+    
+    // Calculate average salary
+    let totalSalary = 0;
+    let salaryCount = 0;
+    careers.forEach(career => {
+        const salary = parseSalaryRange(career.Entry_Salary_LPA);
+        if (salary) {
+            totalSalary += salary;
+            salaryCount++;
+        }
+    });
+    const avgSalary = salaryCount > 0 ? (totalSalary / salaryCount).toFixed(1) : 'N/A';
+    document.getElementById('avgSalary').innerHTML = `Avg Salary: ${avgSalary} LPA`;
+    
+    // Get most common outlook
+    const outlookCount = {};
+    careers.forEach(career => {
+        const outlook = career.Job_Outlook;
+        if (outlook) {
+            outlookCount[outlook] = (outlookCount[outlook] || 0) + 1;
+        }
+    });
+    const topOutlook = Object.keys(outlookCount).reduce((a, b) => 
+        outlookCount[a] > outlookCount[b] ? a : b, 'Various');
+    document.getElementById('topOutlook').innerHTML = `Top Outlook: ${topOutlook}`;
+}
+
+function parseSalaryRange(salaryStr) {
+    if (!salaryStr || salaryStr === 'Varies') return null;
+    if (salaryStr.includes('-')) {
+        const parts = salaryStr.split('-');
+        return (parseFloat(parts[0]) + parseFloat(parts[1])) / 2;
+    }
+    return parseFloat(salaryStr);
+}
+
+function matchesFilters(career) {
+    // Education filter
+    if (currentFilters.education !== 'all') {
+        if (career.Min_Education !== currentFilters.education) return false;
+    }
+    
+    // Salary filter
+    if (currentFilters.salary !== 'all') {
+        const salary = parseSalaryRange(career.Entry_Salary_LPA);
+        if (!salary) return false;
+        
+        if (currentFilters.salary === '12+') {
+            if (salary < 12) return false;
+        } else {
+            const [min, max] = currentFilters.salary.split('-').map(Number);
+            if (salary < min || (max && salary > max)) return false;
+        }
+    }
+    
+    // Outlook filter
+    if (currentFilters.outlook !== 'all') {
+        if (career.Job_Outlook !== currentFilters.outlook) return false;
+    }
+    
+    // Search filter
+    if (currentFilters.search) {
+        const careerName = career.Career_Name.toLowerCase();
+        const skills = (career.Key_Technical_Skills || '').toLowerCase();
+        if (!careerName.includes(currentFilters.search) && !skills.includes(currentFilters.search)) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+function sortCareers(careers) {
+    const sorted = [...careers];
+    
+    switch(currentFilters.sort) {
+        case 'name':
+            sorted.sort((a, b) => a.Career_Name.localeCompare(b.Career_Name));
+            break;
+        case 'salary_high':
+            sorted.sort((a, b) => {
+                const salaryA = parseSalaryRange(a.Entry_Salary_LPA) || 0;
+                const salaryB = parseSalaryRange(b.Entry_Salary_LPA) || 0;
+                return salaryB - salaryA;
+            });
+            break;
+        case 'salary_low':
+            sorted.sort((a, b) => {
+                const salaryA = parseSalaryRange(a.Entry_Salary_LPA) || 0;
+                const salaryB = parseSalaryRange(b.Entry_Salary_LPA) || 0;
+                return salaryA - salaryB;
+            });
+            break;
+        case 'duration':
+            sorted.sort((a, b) => {
+                const durA = parseInt(a.Duration_Years) || 0;
+                const durB = parseInt(b.Duration_Years) || 0;
+                return durA - durB;
+            });
+            break;
+    }
+    
+    return sorted;
+}
+
+function renderCareers(careers) {
+    const start = (currentPage - 1) * careersPerPage;
+    const end = start + careersPerPage;
+    const paginatedCareers = careers.slice(start, end);
+    
+    const grid = document.getElementById('careersGrid');
+    
+    if (paginatedCareers.length === 0) {
+        grid.innerHTML = `
+            <div class="no-results">
+                <i data-feather="search"></i>
+                <p>No careers found matching your filters.</p>
+                <button onclick="resetFilters()" class="btn btn-outline btn-small">Reset Filters</button>
+            </div>
+        `;
+        feather.replace();
+        return;
+    }
+    
+    grid.innerHTML = paginatedCareers.map(career => `
+        <div class="career-card">
+            <div class="career-header">
+                <h3>${escapeHtml(career.Career_Name)}</h3>
+                <span class="outlook-badge ${getOutlookClass(career.Job_Outlook)}">
+                    ${escapeHtml(career.Job_Outlook || 'N/A')}
+                </span>
+            </div>
+            <p class="career-category">${escapeHtml(career.Category)}</p>
+            <div class="career-details">
+                <div class="detail">
+                    <i data-feather="book-open"></i>
+                    <span>${escapeHtml(career.Min_Education || 'N/A')}</span>
+                </div>
+                <div class="detail">
+                    <i data-feather="trending-up"></i>
+                    <span>${escapeHtml(career.Entry_Salary_LPA || 'N/A')} LPA</span>
+                </div>
+                <div class="detail">
+                    <i data-feather="clock"></i>
+                    <span>${escapeHtml(career.Duration_Years || 'N/A')} years</span>
+                </div>
+            </div>
+            <div class="skills-preview">
+                <strong>Key Skills:</strong> ${escapeHtml((career.Key_Technical_Skills || '').split(',').slice(0, 3).join(', '))}
+                ${(career.Key_Technical_Skills || '').split(',').length > 3 ? '...' : ''}
+            </div>
+            <a href="/career/${career.Career_ID}" class="btn btn-small btn-primary">View Details →</a>
+        </div>
+    `).join('');
+    
+    updatePagination(careers.length);
+    feather.replace();
+}
+
+function updatePagination(totalCareers) {
+    const totalPages = Math.ceil(totalCareers / careersPerPage);
+    const paginationDiv = document.getElementById('pagination');
+    
+    if (totalPages <= 1) {
+        paginationDiv.innerHTML = '';
+        return;
+    }
+    
+    let html = '<div class="pagination-controls">';
+    html += `<button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>← Previous</button>`;
+    
+    // Show page numbers
+    for (let i = 1; i <= Math.min(totalPages, 7); i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+            html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+        } else if (i === currentPage - 3 || i === currentPage + 3) {
+            html += '<span class="page-dots">...</span>';
+        }
+    }
+    
+    html += `<button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next →</button>`;
+    html += '</div>';
+    paginationDiv.innerHTML = html;
+}
+
+function changePage(page) {
+    currentPage = page;
+    applyFiltersAndRender();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function applyFiltersAndRender() {
+    let filtered = allCareers.filter(matchesFilters);
+    filtered = sortCareers(filtered);
+    currentPage = 1;
+    renderCareers(filtered);
+}
+
+function resetFilters() {
+    document.getElementById('educationFilter').value = 'all';
+    document.getElementById('salaryFilter').value = 'all';
+    document.getElementById('outlookFilter').value = 'all';
+    document.getElementById('sortFilter').value = 'name';
+    document.getElementById('searchFilter').value = '';
+    
+    currentFilters = {
+        education: 'all',
+        salary: 'all',
+        outlook: 'all',
+        sort: 'name',
+        search: ''
+    };
+    applyFiltersAndRender();
+}
+
+function getOutlookClass(outlook) {
+    const classes = {
+        'Excellent': 'outlook-excellent',
+        'Growing': 'outlook-growing',
+        'Good': 'outlook-good',
+        'Stable': 'outlook-stable'
+    };
+    return classes[outlook] || 'outlook-default';
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Event listeners
+document.getElementById('educationFilter').addEventListener('change', (e) => {
+    currentFilters.education = e.target.value;
+    applyFiltersAndRender();
+});
+
+document.getElementById('salaryFilter').addEventListener('change', (e) => {
+    currentFilters.salary = e.target.value;
+    applyFiltersAndRender();
+});
+
+document.getElementById('outlookFilter').addEventListener('change', (e) => {
+    currentFilters.outlook = e.target.value;
+    applyFiltersAndRender();
+});
+
+document.getElementById('sortFilter').addEventListener('change', (e) => {
+    currentFilters.sort = e.target.value;
+    applyFiltersAndRender();
+});
+
+document.getElementById('searchFilter').addEventListener('input', (e) => {
+    currentFilters.search = e.target.value.toLowerCase();
+    applyFiltersAndRender();
+});
+
+// Load data on page load
+loadCategoryData();
+</script>
+
+<style>
+.category-page {
+    padding: 100px 0 60px;
+    min-height: 100vh;
+    background: var(--bg, #F9F7F5);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    margin-bottom: 24px;
+    font-size: 0.875rem;
+    color: var(--text-light, #6B7280);
+}
+
+.breadcrumb a {
+    color: var(--primary, #4A6FA5);
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb .separator {
+    margin: 0 8px;
+}
+
+/* Category Header */
+.category-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.category-icon-large {
+    width: 80px;
+    height: 80px;
+    background: rgba(74, 111, 165, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.category-icon-large i {
+    width: 40px;
+    height: 40px;
+    color: var(--primary, #4A6FA5);
+}
+
+.category-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 16px;
+    color: var(--text, #2D3E50);
+}
+
+.category-description {
+    max-width: 700px;
+    margin: 0 auto 24px;
+    color: var(--text-light, #6B7280);
+    line-height: 1.6;
+}
+
+.category-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.category-stats .stat {
+    padding: 6px 16px;
+    background: var(--surface, white);
+    border-radius: 40px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--primary, #4A6FA5);
+}
+
+/* Filters */
+.filters-section {
+    background: var(--surface, white);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.filter-group label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-light, #6B7280);
+    margin-bottom: 6px;
+}
+
+.filter-group select,
+.filter-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.875rem;
+    background: var(--surface, white);
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+    outline: none;
+    border-color: var(--primary, #4A6FA5);
+}
+
+.search-group {
+    grid-column: span 1;
+}
+
+/* Careers Grid */
+.careers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.career-card {
+    background: var(--surface, white);
+    border-radius: 20px;
+    padding: 24px;
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.career-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.career-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.career-header h3 {
+    font-size: 1.125rem;
+    margin: 0;
+    flex: 1;
+}
+
+.outlook-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.outlook-excellent {
+    background: #d4edda;
+    color: #155724;
+}
+
+.outlook-growing {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.outlook-good {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.outlook-stable {
+    background: #cfe2ff;
+    color: #004085;
+}
+
+.career-category {
+    color: var(--secondary, #6B8C9E);
+    font-size: 0.75rem;
+    margin-bottom: 16px;
+}
+
+.career-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 16px 0;
+}
+
+.detail {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    color: var(--text-light, #6B7280);
+}
+
+.detail i {
+    width: 16px;
+    height: 16px;
+}
+
+.skills-preview {
+    font-size: 0.75rem;
+    color: var(--text-light, #6B7280);
+    margin: 12px 0;
+    padding: 8px 0;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Pagination */
+.pagination {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.page-btn {
+    padding: 8px 16px;
+    background: var(--surface, white);
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.3s;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: var(--primary, #4A6FA5);
+    color: white;
+    border-color: var(--primary, #4A6FA5);
+}
+
+.page-btn.active {
+    background: var(--primary, #4A6FA5);
+    color: white;
+    border-color: var(--primary, #4A6FA5);
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-dots {
+    padding: 8px;
+}
+
+/* CTA Signup */
+.cta-signup {
+    margin-top: 48px;
+    padding: 40px;
+    background: linear-gradient(135deg, var(--primary, #4A6FA5), var(--secondary, #6B8C9E));
+    border-radius: 24px;
+    text-align: center;
+    color: white;
+}
+
+.cta-signup h3 {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+}
+
+.cta-signup p {
+    margin-bottom: 24px;
+    opacity: 0.9;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.cta-buttons .btn-primary {
+    background: white;
+    color: var(--primary, #4A6FA5);
+}
+
+.cta-buttons .btn-primary:hover {
+    transform: translateY(-2px);
+}
+
+.cta-buttons .btn-outline {
+    border-color: white;
+    color: white;
+}
+
+.cta-buttons .btn-outline:hover {
+    background: white;
+    color: var(--primary, #4A6FA5);
+}
+
+/* Loading & Error States */
+.loading-spinner {
+    text-align: center;
+    padding: 60px;
+}
+
+.loading-spinner i {
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    color: var(--primary, #4A6FA5);
+}
+
+.error-message {
+    text-align: center;
+    padding: 60px;
+}
+
+.error-message i {
+    width: 48px;
+    height: 48px;
+    color: var(--error, #E27C7C);
+    margin-bottom: 16px;
+}
+
+.no-results {
+    text-align: center;
+    padding: 60px;
+    background: var(--surface, white);
+    border-radius: 20px;
+}
+
+.no-results i {
+    width: 48px;
+    height: 48px;
+    color: var(--text-light, #6B7280);
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .category-page {
+        padding: 80px 0 40px;
+    }
+    
+    .container {
+        padding: 0 16px;
+    }
+    
+    .category-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .careers-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .category-stats {
+        gap: 12px;
+    }
+    
+    .category-stats .stat {
+        font-size: 0.75rem;
+        padding: 4px 12px;
+    }
+    
+    .cta-signup {
+        padding: 24px;
+    }
+    
+    .cta-signup h3 {
+        font-size: 1.25rem;
+    }
+    
+    .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .cta-buttons .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}

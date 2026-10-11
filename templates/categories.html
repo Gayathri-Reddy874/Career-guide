@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}All Career Categories - CareerGuide AI{% endblock %}
+
+{% block content %}
+<section class="all-categories-section">
+    <div class="container">
+        <div class="page-header">
+            <h1>Explore Career Categories</h1>
+            <p>Browse careers by industry and domain to find your perfect path</p>
+        </div>
+        
+        <div class="categories-grid">
+            {% for category in categories %}
+            <a href="/category/{{ category }}" class="category-card-large">
+                <div class="category-icon">
+                    {% if category == 'Healthcare' %}
+                        <i data-feather="heart"></i>
+                    {% elif category == 'Information Technology' %}
+                        <i data-feather="cpu"></i>
+                    {% elif category == 'Core Engineering' %}
+                        <i data-feather="tool"></i>
+                    {% elif category == 'Emerging Technologies' %}
+                        <i data-feather="zap"></i>
+                    {% elif category == 'Management' %}
+                        <i data-feather="briefcase"></i>
+                    {% elif category == 'Banking Finance' %}
+                        <i data-feather="trending-up"></i>
+                    {% elif category == 'Government' %}
+                        <i data-feather="shield"></i>
+                    {% elif category == 'Defence' %}
+                        <i data-feather="flag"></i>
+                    {% elif category == 'Education' %}
+                        <i data-feather="book-open"></i>
+                    {% elif category == 'Law' %}
+                        <i data-feather="scale"></i>
+                    {% elif category == 'Media' %}
+                        <i data-feather="mic"></i>
+                    {% elif category == 'Arts' %}
+                        <i data-feather="palette"></i>
+                    {% elif category == 'Entertainment' %}
+                        <i data-feather="film"></i>
+                    {% elif category == 'Skilled Trades' %}
+                        <i data-feather="wrench"></i>
+                    {% elif category == 'Agriculture' %}
+                        <i data-feather="sun"></i>
+                    {% elif category == 'Hospitality' %}
+                        <i data-feather="coffee"></i>
+                    {% elif category == 'Sports' %}
+                        <i data-feather="award"></i>
+                    {% elif category == 'Social Work' %}
+                        <i data-feather="users"></i>
+                    {% elif category == 'Science' %}
+                        <i data-feather="globe"></i>
+                    {% elif category == 'Retail' %}
+                        <i data-feather="shopping-bag"></i>
+                    {% else %}
+                        <i data-feather="star"></i>
+                    {% endif %}
+                </div>
+                <div class="category-info">
+                    <h3>{{ category }}</h3>
+                    <p class="category-stats">Explore all {{ category }} careers</p>
+                </div>
+                <div class="category-arrow">
+                    <i data-feather="arrow-right"></i>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<style>
+.all-categories-section {
+    padding: 48px 0;
+    min-height: 100vh;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 16px;
+}
+
+.page-header p {
+    color: var(--text-light, #6B7280);
+    font-size: 1.125rem;
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.category-card-large {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    background: var(--surface, white);
+    border-radius: 16px;
+    text-decoration: none;
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.category-card-large:hover {
+    transform: translateX(8px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.category-icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(74, 111, 165, 0.1);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.category-icon i {
+    width: 28px;
+    height: 28px;
+    color: var(--primary, #4A6FA5);
+}
+
+.category-info {
+    flex: 1;
+}
+
+.category-info h3 {
+    margin: 0 0 4px 0;
+    font-size: 1.125rem;
+    color: var(--text, #2D3E50);
+}
+
+.category-stats {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-light, #6B7280);
+}
+
+.category-arrow i {
+    width: 20px;
+    height: 20px;
+    color: var(--primary, #4A6FA5);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.category-card-large:hover .category-arrow i {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .categories-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .page-header h1 {
+        font-size: 1.75rem;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}{{ career.Career_Name }} - Career Details{% endblock %}
+
+{% block content %}
+<section class="career-detail">
+    <div class="container">
+        <div class="career-breadcrumb">
+            <a href="/">Home</a> / 
+            <a href="/category/{{ career.Category }}">{{ career.Category }}</a> / 
+            <span>{{ career.Career_Name }}</span>
+        </div>
+        
+        <div class="career-header">
+            <h1>{{ career.Career_Name }}</h1>
+            <span class="career-badge">{{ career.Category }}</span>
+        </div>
+        
+        <div class="career-content">
+            <div class="career-main">
+                <!-- Education Card -->
+                <div class="info-card">
+                    <h3><i data-feather="book-open"></i> Education Requirements</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Minimum Education:</strong>
+                            <span>{{ career.Min_Education }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Preferred Stream:</strong>
+                            <span>{{ career.Preferred_Stream }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Required Degree:</strong>
+                            <span>{{ career.Required_Degree }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Entrance Exams:</strong>
+                            <span>{{ career.Entrance_Exams }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Duration:</strong>
+                            <span>{{ career.Duration_Years }} years</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Skills Card -->
+                <div class="info-card">
+                    <h3><i data-feather="code"></i> Required Skills</h3>
+                    <div class="skills-section">
+                        <div class="skills-group">
+                            <strong>Technical Skills:</strong>
+                            <div class="skill-tags">
+                                {% for skill in career.Key_Technical_Skills.split(',') %}
+                                <span class="skill-tag">{{ skill.strip() }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="skills-group">
+                            <strong>Soft Skills:</strong>
+                            <div class="skill-tags">
+                                {% for skill in career.Key_Soft_Skills.split(',') %}
+                                <span class="skill-tag soft">{{ skill.strip() }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Salary Card -->
+                <div class="info-card">
+                    <h3><i data-feather="trending-up"></i> Salary Expectations</h3>
+                    <div class="salary-chart">
+                        <div class="salary-level">
+                            <span class="level">Entry Level</span>
+                            <div class="salary-bar">
+                                <div class="bar-fill" style="width: {{ (career.entry_salary_avg / 40 * 100) if career.entry_salary_avg else 30 }}%"></div>
+                            </div>
+                            <span class="salary-amount">{{ career.Entry_Salary_LPA }} LPA</span>
+                        </div>
+                        <div class="salary-level">
+                            <span class="level">Mid Level</span>
+                            <div class="salary-bar">
+                                <div class="bar-fill" style="width: {{ (career.mid_salary_avg / 40 * 100) if career.mid_salary_avg else 50 }}%"></div>
+                            </div>
+                            <span class="salary-amount">{{ career.Mid_Salary_LPA }} LPA</span>
+                        </div>
+                        <div class="salary-level">
+                            <span class="level">Senior Level</span>
+                            <div class="salary-bar">
+                                <div class="bar-fill" style="width: {{ (career.senior_salary_avg / 40 * 100) if career.senior_salary_avg else 70 }}%"></div>
+                            </div>
+                            <span class="salary-amount">{{ career.Senior_Salary_LPA }} LPA</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Job Outlook Card -->
+                <div class="info-card">
+                    <h3><i data-feather="activity"></i> Job Outlook</h3>
+                    <div class="outlook-badge {{ career.Job_Outlook.lower() }}">
+                        {{ career.Job_Outlook }}
+                    </div>
+                    <p>This career has {{ career.Job_Outlook.lower() }} prospects in the Indian market.</p>
+                </div>
+                
+                <!-- Top Recruiters Card -->
+                <div class="info-card">
+                    <h3><i data-feather="briefcase"></i> Top Recruiters in India</h3>
+                    <div class="recruiters-list">
+                        {% for recruiter in career.Top_Recruiters_India.split(',') %}
+                        <span class="recruiter-tag">{{ recruiter.strip() }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="career-sidebar">
+                <!-- Similar Careers -->
+                <div class="similar-careers">
+                    <h3><i data-feather="users"></i> Similar Careers</h3>
+                    {% for similar_career in similar %}
+                    <a href="/career/{{ similar_career.Career_ID }}" class="similar-card">
+                        <h4>{{ similar_career.Career_Name }}</h4>
+                        <p>{{ similar_career.Category }}</p>
+                        <span class="match-score">{{ similar_career.match_score }}% Match</span>
+                    </a>
+                    {% endfor %}
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn btn-outline" id="compareBtn" data-career-id="{{ career.Career_ID }}">
+                        <i data-feather="git-compare"></i>
+                        Compare
+                    </button>
+                    <button class="btn btn-primary" id="saveBtn">
+                        <i data-feather="bookmark"></i>
+                        Save Career
+                    </button>
+                </div>
+                
+                <!-- Chatbot Quick Question -->
+                <div class="quick-question">
+                    <h3><i data-feather="message-circle"></i> Have a Question?</h3>
+                    <input type="text" id="quickQuestion" placeholder="Ask about this career...">
+                    <button id="askBtn" class="btn btn-small">Ask AI</button>
+                    <div id="quickAnswer" class="quick-answer" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Compare functionality
+    document.getElementById('compareBtn')?.addEventListener('click', function() {
+        let compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
+        const careerId = this.dataset.careerId;
+        
+        if (compareList.includes(careerId)) {
+            compareList = compareList.filter(id => id !== careerId);
+            alert('Removed from comparison');
+        } else if (compareList.length >= 3) {
+            alert('You can compare up to 3 careers at a time');
+            return;
+        } else {
+            compareList.push(careerId);
+            alert('Added to comparison');
+        }
+        
+        localStorage.setItem('compareList', JSON.stringify(compareList));
+        
+        // Update button text
+        this.innerHTML = compareList.includes(careerId) ? 
+            '<i data-feather="git-compare"></i> Remove from Compare' : 
+            '<i data-feather="git-compare"></i> Compare';
+        feather.replace();
+    });
+    
+    // Save career
+    document.getElementById('saveBtn')?.addEventListener('click', function() {
+        let saved = JSON.parse(localStorage.getItem('savedCareers') || '[]');
+        const careerId = '{{ career.Career_ID }}';
+        
+        if (!saved.includes(careerId)) {
+            saved.push(careerId);
+            localStorage.setItem('savedCareers', JSON.stringify(saved));
+            alert('Career saved to your profile!');
+            this.innerHTML = '<i data-feather="bookmark"></i> Saved';
+        } else {
+            alert('Already saved this career');
+        }
+        feather.replace();
+    });
+    
+    // Quick question
+    document.getElementById('askBtn')?.addEventListener('click', async function() {
+        const question = document.getElementById('quickQuestion').value;
+        if (!question) return;
+        
+        const answerDiv = document.getElementById('quickAnswer');
+        answerDiv.style.display = 'block';
+        answerDiv.innerHTML = '<i data-feather="loader"></i> Thinking...';
+        feather.replace();
+        
+        try {
+            const response = await fetch('/api/chatbot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    message: `Tell me about ${career.Career_Name}. ${question}`
+                })
+            });
+            
+            const data = await response.json();
+            answerDiv.innerHTML = data.response;
+            feather.replace();
+        } catch (error) {
+            answerDiv.innerHTML = 'Sorry, I couldn\'t answer that. Please try the full chatbot for more help.';
+        }
+    });
+    
+    // Initialize compare button state
+    const compareBtn = document.getElementById('compareBtn');
+    if (compareBtn) {
+        const compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
+        if (compareList.includes('{{ career.Career_ID }}')) {
+            compareBtn.innerHTML = '<i data-feather="git-compare"></i> Remove from Compare';
+            feather.replace();
+        }
+    }
+    
+    // Initialize save button state
+    const saveBtn = document.getElementById('saveBtn');
+    if (saveBtn) {
+        const saved = JSON.parse(localStorage.getItem('savedCareers') || '[]');
+        if (saved.includes('{{ career.Career_ID }}')) {
+            saveBtn.innerHTML = '<i data-feather="bookmark"></i> Saved';
+            feather.replace();
+        }
+    }
+</script>
+{% endblock %}

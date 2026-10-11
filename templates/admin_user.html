@@ -1,0 +1,1012 @@
+<!-- templates/admin_user.html - Fixed Version -->
+{% extends "base.html" %}
+
+{% block title %}User Details - {{ user.username }} | Admin - CareerGuide AI{% endblock %}
+
+{% block content %}
+<div class="admin-user-page">
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <div class="header-left">
+                <a href="/admin" class="back-link">
+                    <i data-feather="arrow-left"></i>
+                    Back to Dashboard
+                </a>
+                <h1>User Details</h1>
+                <p>View and manage user information and assessment results</p>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-danger" id="deleteUserBtn" onclick="showDeleteModal()">
+                    <i data-feather="trash-2"></i>
+                    Delete User
+                </button>
+            </div>
+        </div>
+
+        <!-- User Profile Card -->
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <i data-feather="user"></i>
+                </div>
+                <div class="profile-info">
+                    <h2>{{ user.full_name or user.username }}</h2>
+                    <p class="username">@{{ user.username }}</p>
+                    <div class="user-meta">
+                        <span class="meta-badge">
+                            <i data-feather="mail"></i>
+                            {{ user.email }}
+                        </span>
+                        {% if user.phone %}
+                        <span class="meta-badge">
+                            <i data-feather="phone"></i>
+                            {{ user.phone }}
+                        </span>
+                        {% endif %}
+                        <span class="meta-badge">
+                            <i data-feather="calendar"></i>
+                            Joined: {{ user.created_at[:10] if user.created_at else 'N/A' }}
+                        </span>
+                        {% if user.last_login %}
+                        <span class="meta-badge">
+                            <i data-feather="clock"></i>
+                            Last Login: {{ user.last_login[:16] if user.last_login else 'Never' }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="profile-status">
+                    <span class="status-badge {{ 'active' if user.is_admin else 'user' }}">
+                        {% if user.is_admin %}Admin{% else %}User{% endif %}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="profile-details">
+                <div class="detail-group">
+                    <h4>Education Information</h4>
+                    <div class="detail-row">
+                        <span class="detail-label">Education Level:</span>
+                        <span class="detail-value">{{ user.education or 'Not specified' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Academic Stream:</span>
+                        <span class="detail-value">{{ user.stream or 'Not specified' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i data-feather="brain"></i>
+                <div class="stat-info">
+                    <h3>Psychometric Tests</h3>
+                    <p>{{ psychometric_results|length }}</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i data-feather="help-circle"></i>
+                <div class="stat-info">
+                    <h3>Career Quizzes</h3>
+                    <p>{{ quiz_results|length }}</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i data-feather="calendar"></i>
+                <div class="stat-info">
+                    <h3>Account Age</h3>
+                    <p>{% if user.created_at %}{{ user.created_at[:10] }}{% else %}New{% endif %}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Psychometric Test Results -->
+        <div class="results-section">
+            <h2>
+                <i data-feather="brain"></i>
+                Psychometric Assessment Results
+            </h2>
+            
+            {% if psychometric_results %}
+                {% for result in psychometric_results %}
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-date">
+                            <i data-feather="calendar"></i>
+                            {{ result.test_date[:16] if result.test_date else 'Date not available' }}
+                        </div>
+                        <button class="toggle-summary" onclick="toggleSummary('psych-{{ loop.index }}')">
+                            <i data-feather="chevron-down"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="result-summary" id="summary-psych-{{ loop.index }}" style="display: none;">
+                        {% if result.ai_summary %}
+                            <div class="summary-content">
+                                <h3>📋 AI Generated Summary</h3>
+                                <div class="summary-text">
+                                    {{ result.ai_summary|safe }}
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="no-summary">No AI summary available</p>
+                        {% endif %}
+                        
+                        <div class="result-details">
+                            <h4>📊 Detailed Scores</h4>
+                            <div class="scores-grid">
+                                {% if result.personality %}
+                                <div class="score-group">
+                                    <h5>Personality Traits (Big 5)</h5>
+                                    {% for trait, score in result.personality.items() %}
+                                    <div class="score-row">
+                                        <span>{{ trait|title }}</span>
+                                        <div class="score-bar">
+                                            <div class="score-fill" style="width: {{ (score / 5) * 100 }}%"></div>
+                                        </div>
+                                        <span class="score-value">{{ (score / 5 * 100)|int }}%</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                
+                                {% if result.interests %}
+                                <div class="score-group">
+                                    <h5>RIASEC Interests</h5>
+                                    {% for interest, score in result.interests.items() %}
+                                    <div class="score-row">
+                                        <span>{{ interest|title }}</span>
+                                        <div class="score-bar">
+                                            <div class="score-fill" style="width: {{ (score / 5) * 100 }}%"></div>
+                                        </div>
+                                        <span class="score-value">{{ (score / 5 * 100)|int }}%</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                
+                                {% if result.aptitudes %}
+                                <div class="score-group">
+                                    <h5>Aptitudes</h5>
+                                    {% for aptitude, score in result.aptitudes.items() %}
+                                    <div class="score-row">
+                                        <span>{{ aptitude|title }}</span>
+                                        <div class="score-bar">
+                                            <div class="score-fill" style="width: {{ (score / 5) * 100 }}%"></div>
+                                        </div>
+                                        <span class="score-value">{{ (score / 5 * 100)|int }}%</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if result.career_matches %}
+                        <div class="career-matches">
+                            <h4>🎯 Top Career Matches</h4>
+                            <div class="matches-list">
+                                {% for match in result.career_matches[:5] %}
+                                <div class="match-item">
+                                    <div class="match-info">
+                                        <strong>{{ match.title }}</strong>
+                                        <span class="match-score">{{ match.match }}% Match</span>
+                                    </div>
+                                    <p>{{ match.description }}</p>
+                                    {% if match.reasons %}
+                                    <div class="match-reasons">
+                                        <small>✓ {{ match.reasons|join(' • ') }}</small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i data-feather="brain"></i>
+                    <p>No psychometric test results found for this user</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Career Quiz Results -->
+        <div class="results-section">
+            <h2>
+                <i data-feather="help-circle"></i>
+                Career Quiz Results
+            </h2>
+            
+            {% if quiz_results %}
+                {% for result in quiz_results %}
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-date">
+                            <i data-feather="calendar"></i>
+                            {{ result.test_date[:16] if result.test_date else 'Date not available' }}
+                        </div>
+                        <button class="toggle-summary" onclick="toggleSummary('quiz-{{ loop.index }}')">
+                            <i data-feather="chevron-down"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="result-summary" id="summary-quiz-{{ loop.index }}" style="display: none;">
+                        {% if result.ai_summary %}
+                            <div class="summary-content">
+                                <h3>📋 AI Generated Summary</h3>
+                                <div class="summary-text">
+                                    {{ result.ai_summary|safe }}
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="quiz-answers">
+                            <h4>📝 User Answers</h4>
+                            <div class="answers-grid">
+                                <div class="answer-item">
+                                    <strong>Education Level:</strong>
+                                    <span>{{ result.answers.education or 'Not answered' }}</span>
+                                </div>
+                                <div class="answer-item">
+                                    <strong>Academic Stream:</strong>
+                                    <span>{{ result.answers.stream or 'Not answered' }}</span>
+                                </div>
+                                <div class="answer-item">
+                                    <strong>Interests:</strong>
+                                    <span>{{ result.answers.interests|join(', ') if result.answers.interests else 'Not answered' }}</span>
+                                </div>
+                                <div class="answer-item">
+                                    <strong>Skills:</strong>
+                                    <span>{{ result.answers.skills|join(', ') if result.answers.skills else 'Not answered' }}</span>
+                                </div>
+                                <div class="answer-item">
+                                    <strong>Work Environment:</strong>
+                                    <span>{{ result.answers.work_environment or 'Not answered' }}</span>
+                                </div>
+                                <div class="answer-item">
+                                    <strong>Salary Expectation:</strong>
+                                    <span>{{ result.answers.salary_range or 'Not answered' }} LPA</span>
+                                </div>
+                                <div class="answer-item">
+                                    <strong>Job Outlook:</strong>
+                                    <span>{{ result.answers.job_outlook or 'Not answered' }}</span>
+                                </div>
+                                <div class="answer-item">
+                                    <strong>Career Goals:</strong>
+                                    <span>{{ result.answers.goals or 'Not answered' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if result.recommendations %}
+                        <div class="recommendations">
+                            <h4>🎯 Recommended Careers</h4>
+                            <div class="recommendations-list">
+                                {% for rec in result.recommendations[:10] %}
+                                <div class="rec-item">
+                                    <div class="rec-info">
+                                        <strong>{{ rec.Career_Name }}</strong>
+                                        <span class="rec-match">{{ rec.match_score }}% Match</span>
+                                    </div>
+                                    <div class="rec-details">
+                                        <span>📂 {{ rec.Category }}</span>
+                                        <span>💰 {{ rec.Entry_Salary_LPA }} LPA</span>
+                                        <span>📚 {{ rec.Min_Education }}</span>
+                                        <span>📈 {{ rec.Job_Outlook }}</span>
+                                    </div>
+                                    <a href="/career/{{ rec.Career_ID }}" target="_blank" class="btn-small">View Career →</a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i data-feather="help-circle"></i>
+                    <p>No career quiz results found for this user</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>⚠️ Delete User</h3>
+            <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete user <strong>{{ user.username }}</strong>?</p>
+            <p class="warning-text">This action cannot be undone. All test results and data associated with this user will be permanently deleted.</p>
+        </div>
+        <div class="modal-footer">
+            <form action="/admin/user/{{ user.id }}/delete" method="POST">
+                <button type="button" class="btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button type="submit" class="btn-danger">Yes, Delete User</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleSummary(id) {
+    const summary = document.getElementById(`summary-${id}`);
+    const btn = summary.previousElementSibling.querySelector('.toggle-summary i');
+    
+    if (summary.style.display === 'none' || !summary.style.display) {
+        summary.style.display = 'block';
+        if (btn) btn.setAttribute('data-feather', 'chevron-up');
+    } else {
+        summary.style.display = 'none';
+        if (btn) btn.setAttribute('data-feather', 'chevron-down');
+    }
+    if (typeof feather !== 'undefined') feather.replace();
+}
+
+function showDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+}
+
+// Initialize all summaries as hidden on load
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.result-summary').forEach(summary => {
+        summary.style.display = 'none';
+    });
+});
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('deleteModal');
+    if (event.target === modal) {
+        closeDeleteModal();
+    }
+}
+</script>
+
+<style>
+.admin-user-page {
+    padding: 100px 0 60px;
+    min-height: 100vh;
+    background: var(--bg, #F9F7F5);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* Page Header */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.header-left .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--primary, #4A6FA5);
+    text-decoration: none;
+    font-size: 0.875rem;
+    margin-bottom: 12px;
+}
+
+.header-left .back-link:hover {
+    text-decoration: underline;
+}
+
+.header-left h1 {
+    font-size: 1.75rem;
+    margin-bottom: 8px;
+}
+
+.header-left p {
+    color: var(--text-light, #6B7280);
+}
+
+.btn-danger {
+    background: #E27C7C;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.btn-danger:hover {
+    background: #c86a6a;
+    transform: translateY(-2px);
+}
+
+/* Profile Card */
+.profile-card {
+    background: var(--surface, white);
+    border-radius: 24px;
+    padding: 28px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary, #4A6FA5), var(--secondary, #6B8C9E));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-avatar i {
+    width: 40px;
+    height: 40px;
+    color: white;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-info h2 {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+}
+
+.username {
+    color: var(--text-light, #6B7280);
+    margin-bottom: 12px;
+}
+
+.user-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.meta-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: var(--bg, #F9F7F5);
+    border-radius: 20px;
+    font-size: 0.75rem;
+}
+
+.meta-badge i {
+    width: 14px;
+    height: 14px;
+}
+
+.profile-status {
+    flex-shrink: 0;
+}
+
+.status-badge {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-badge.active {
+    background: #86A789;
+    color: white;
+}
+
+.status-badge.user {
+    background: var(--primary, #4A6FA5);
+    color: white;
+}
+
+.profile-details {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.detail-group h4 {
+    margin-bottom: 12px;
+    font-size: 0.875rem;
+    color: var(--text-light, #6B7280);
+}
+
+.detail-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.detail-label {
+    width: 140px;
+    font-weight: 500;
+}
+
+.detail-value {
+    color: var(--text, #2D3E50);
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    background: var(--surface, white);
+    padding: 20px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.stat-card i {
+    width: 40px;
+    height: 40px;
+    color: var(--primary, #4A6FA5);
+}
+
+.stat-info h3 {
+    font-size: 0.875rem;
+    margin-bottom: 4px;
+    color: var(--text-light, #6B7280);
+}
+
+.stat-info p {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary, #4A6FA5);
+}
+
+/* Results Section */
+.results-section {
+    margin-bottom: 40px;
+}
+
+.results-section h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.25rem;
+    margin-bottom: 20px;
+}
+
+.results-section h2 i {
+    width: 24px;
+    height: 24px;
+    color: var(--primary, #4A6FA5);
+}
+
+.result-card {
+    background: var(--surface, white);
+    border-radius: 20px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--bg, #F9F7F5);
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.result-date {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: var(--text-light, #6B7280);
+}
+
+.result-date i {
+    width: 16px;
+    height: 16px;
+}
+
+.toggle-summary {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    transition: transform 0.3s;
+}
+
+.toggle-summary i {
+    width: 20px;
+    height: 20px;
+    color: var(--text-light, #6B7280);
+}
+
+.result-summary {
+    padding: 24px;
+}
+
+/* Summary Content */
+.summary-content {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.summary-content h3 {
+    font-size: 1.125rem;
+    margin-bottom: 16px;
+    color: var(--primary, #4A6FA5);
+}
+
+.summary-text {
+    color: var(--text-light, #6B7280);
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.no-summary {
+    color: var(--text-light, #6B7280);
+    text-align: center;
+    padding: 20px;
+}
+
+/* Scores Grid */
+.scores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.score-group h5 {
+    margin-bottom: 12px;
+    font-size: 0.875rem;
+    color: var(--text-light, #6B7280);
+}
+
+.score-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.score-row span:first-child {
+    width: 100px;
+    font-size: 0.875rem;
+}
+
+.score-bar {
+    flex: 1;
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.score-fill {
+    height: 100%;
+    background: var(--primary, #4A6FA5);
+    border-radius: 3px;
+}
+
+.score-value {
+    width: 40px;
+    font-size: 0.75rem;
+    color: var(--text-light, #6B7280);
+}
+
+/* Career Matches */
+.career-matches h4,
+.quiz-answers h4,
+.recommendations h4 {
+    margin-bottom: 16px;
+    font-size: 1rem;
+}
+
+.matches-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.match-item {
+    padding: 16px;
+    background: var(--bg, #F9F7F5);
+    border-radius: 12px;
+}
+
+.match-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.match-info strong {
+    font-size: 1rem;
+}
+
+.match-score {
+    padding: 2px 8px;
+    background: #86A789;
+    color: white;
+    border-radius: 12px;
+    font-size: 0.75rem;
+}
+
+.match-item p {
+    font-size: 0.875rem;
+    color: var(--text-light, #6B7280);
+    margin-bottom: 8px;
+}
+
+.match-reasons small {
+    font-size: 0.75rem;
+    color: var(--text-light, #6B7280);
+}
+
+/* Quiz Answers */
+.answers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: var(--bg, #F9F7F5);
+    border-radius: 12px;
+}
+
+.answer-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.answer-item strong {
+    font-size: 0.75rem;
+    color: var(--text-light, #6B7280);
+}
+
+.answer-item span {
+    font-size: 0.875rem;
+}
+
+/* Recommendations */
+.recommendations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rec-item {
+    padding: 16px;
+    background: var(--bg, #F9F7F5);
+    border-radius: 12px;
+}
+
+.rec-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.rec-info strong {
+    font-size: 1rem;
+}
+
+.rec-match {
+    padding: 2px 8px;
+    background: var(--primary, #4A6FA5);
+    color: white;
+    border-radius: 12px;
+    font-size: 0.75rem;
+}
+
+.rec-details {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+    font-size: 0.75rem;
+    color: var(--text-light, #6B7280);
+    flex-wrap: wrap;
+}
+
+.btn-small {
+    display: inline-block;
+    padding: 6px 12px;
+    background: var(--primary, #4A6FA5);
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    transition: all 0.3s;
+}
+
+.btn-small:hover {
+    background: var(--primary-dark, #3a5a8a);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 48px;
+    background: var(--surface, white);
+    border-radius: 20px;
+}
+
+.empty-state i {
+    width: 48px;
+    height: 48px;
+    color: var(--text-light, #6B7280);
+    margin-bottom: 16px;
+}
+
+.empty-state p {
+    color: var(--text-light, #6B7280);
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--surface, white);
+    border-radius: 24px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-light, #6B7280);
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.warning-text {
+    color: #E27C7C;
+    font-size: 0.875rem;
+    margin-top: 12px;
+}
+
+.modal-footer {
+    padding: 20px 24px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.modal-footer form {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-secondary {
+    padding: 8px 20px;
+    background: #e5e7eb;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .admin-user-page {
+        padding: 80px 0 40px;
+    }
+    
+    .container {
+        padding: 0 16px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .user-meta {
+        justify-content: center;
+    }
+    
+    .profile-status {
+        align-self: center;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .scores-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .answers-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .rec-details {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .modal-footer form {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}

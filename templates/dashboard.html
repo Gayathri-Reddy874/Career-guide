@@ -1,0 +1,301 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Dashboard - CareerGuide AI{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Welcome, {{ user.full_name or user.username }}!</h1>
+            <p>Track your career journey and access your assessment results</p>
+        </div>
+        
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <i data-feather="brain"></i>
+                <div class="stat-info">
+                    <h3>Psychometric Tests</h3>
+                    <p>{{ psychometric_results|length }} completed</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i data-feather="help-circle"></i>
+                <div class="stat-info">
+                    <h3>Career Quizzes</h3>
+                    <p>{{ quiz_results|length }} completed</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i data-feather="bookmark"></i>
+                <div class="stat-info">
+                    <h3>Saved Careers</h3>
+                    <p id="savedCount">0</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <h2><i data-feather="brain"></i> Psychometric Assessment</h2>
+                {% if psychometric_results %}
+                    <div class="result-preview">
+                        <p>Last test: {{ psychometric_results[0].test_date[:10] }}</p>
+                        <a href="/psychometric-results" class="btn btn-small">View Latest Results</a>
+                    </div>
+                {% else %}
+                    <p>You haven't taken the psychometric test yet.</p>
+                    <a href="/psychometric-test" class="btn btn-primary">Take Test Now</a>
+                {% endif %}
+            </div>
+            
+            <div class="dashboard-card">
+                <h2><i data-feather="help-circle"></i> Career Quiz</h2>
+                {% if quiz_results %}
+                    <div class="result-preview">
+                        <p>Last quiz: {{ quiz_results[0].test_date[:10] }}</p>
+                        <a href="/results" class="btn btn-small">View Latest Results</a>
+                    </div>
+                {% else %}
+                    <p>You haven't taken the career quiz yet.</p>
+                    <a href="/quiz" class="btn btn-primary">Take Quiz Now</a>
+                {% endif %}
+            </div>
+
+
+            <!-- Add to dashboard.html or create a new page -->
+<div class="dashboard-card">
+    <h2><i data-feather="brain"></i> IQ Test History</h2>
+    {% if iq_results %}
+        <div class="iq-history">
+            <p>Your latest IQ score: <strong>{{ iq_results[0].iq_score }}</strong></p>
+            <p>Best score: <strong>{{ iq_stats.highest_score if iq_stats else 'N/A' }}</strong></p>
+            <p>Tests taken: <strong>{{ iq_stats.total_tests if iq_stats else 0 }}</strong></p>
+        </div>
+        <a href="/iq-test-results" class="btn btn-small">View Full Results</a>
+    {% else %}
+        <p>You haven't taken the IQ test yet.</p>
+        <a href="/iq-test" class="btn btn-primary">Take IQ Test</a>
+    {% endif %}
+</div>
+
+            <!-- Add to dashboard.html -->
+<div class="dashboard-card">
+    <h2><i data-feather="brain"></i> IQ Test</h2>
+    <p>Assess your cognitive abilities across 5 domains</p>
+    <a href="/iq-test" class="btn btn-primary">Take IQ Test</a>
+</div>
+            
+            <div class="dashboard-card">
+                <h2><i data-feather="message-circle"></i> AI Assistant</h2>
+                <p>Get instant answers to your career questions</p>
+                <a href="/chatbot" class="btn btn-outline">Chat Now</a>
+            </div>
+            
+            
+        </div>
+        
+        <div class="dashboard-card full-width">
+            <h2><i data-feather="trending-up"></i> Recommended Next Steps</h2>
+            <div class="steps-list">
+                {% if not psychometric_results %}
+                <div class="step-item">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <h3>Take Psychometric Test</h3>
+                        <p>Understand your personality, interests, and aptitudes</p>
+                        <a href="/psychometric-test">Start →</a>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if not quiz_results %}
+                <div class="step-item">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <h3>Take Career Quiz</h3>
+                        <p>Get quick career recommendations</p>
+                        <a href="/quiz">Start →</a>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="step-item">
+                    <span class="step-number">3</span>
+                    <div class="step-content">
+                        <h3>Explore Career Categories</h3>
+                        <p>Browse careers by industry and domain</p>
+                        <a href="/categories">Explore →</a>
+                    </div>
+                </div>
+                
+                <div class="step-item">
+                    <span class="step-number">4</span>
+                    <div class="step-content">
+                        <h3>Chat with AI Assistant</h3>
+                        <p>Ask questions about specific careers</p>
+                        <a href="/chatbot">Chat →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load saved careers count
+const savedCareers = JSON.parse(localStorage.getItem('savedCareers') || '[]');
+document.getElementById('savedCount').textContent = savedCareers.length;
+</script>
+
+<style>
+.dashboard-page {
+    padding: 120px 0 80px;
+    min-height: 100vh;
+    background: var(--bg, #F9F7F5);
+}
+
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.dashboard-header h1 {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: var(--surface, white);
+    padding: 20px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.stat-card i {
+    width: 40px;
+    height: 40px;
+    color: var(--primary, #4A6FA5);
+}
+
+.stat-info h3 {
+    font-size: 1rem;
+    margin-bottom: 4px;
+}
+
+.stat-info p {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary, #4A6FA5);
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.dashboard-card {
+    background: var(--surface, white);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+.dashboard-card h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.25rem;
+    margin-bottom: 16px;
+}
+
+.dashboard-card h2 i {
+    width: 24px;
+    height: 24px;
+    color: var(--primary, #4A6FA5);
+}
+
+.full-width {
+    grid-column: span 2;
+}
+
+.result-preview {
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--bg, #F9F7F5);
+    border-radius: 12px;
+}
+
+.steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.step-item {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: var(--bg, #F9F7F5);
+    border-radius: 16px;
+}
+
+.step-number {
+    width: 36px;
+    height: 36px;
+    background: var(--primary, #4A6FA5);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-content h3 {
+    margin-bottom: 4px;
+}
+
+.step-content p {
+    color: var(--text-light, #6B7280);
+    font-size: 0.875rem;
+    margin-bottom: 8px;
+}
+
+.step-content a {
+    color: var(--primary, #4A6FA5);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .full-width {
+        grid-column: span 1;
+    }
+}
+</style>
+{% endblock %}

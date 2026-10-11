@@ -1,0 +1,1140 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+
+{% block title %}CareerGuide AI - Find Your Perfect Career Path with AI-Powered Guidance{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="badge">AI-Powered Career Guidance</span>
+            </div>
+            <h1 class="hero-title">Discover Your Perfect <span class="gradient-text">Career Path</span></h1>
+            <p class="hero-description">
+                AI-powered career guidance tailored to your personality, interests, and skills. 
+                Explore 300+ careers with detailed insights and get personalized recommendations.
+            </p>
+            
+            <div class="hero-actions">
+                <a href="/psychometric-test" class="btn btn-primary btn-large">
+                    <i data-feather="brain"></i>
+                    Take Psychometric Test
+                </a>
+                <a href="/quiz" class="btn btn-secondary btn-large">
+                    <i data-feather="help-circle"></i>
+                    Quick Career Quiz
+                </a>
+                <a href="/chatbot" class="btn btn-outline btn-large">
+                    <i data-feather="message-circle"></i>
+                    Chat with AI
+                </a>
+            </div>
+            
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-number">300+</span>
+                    <span class="stat-label">Careers</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">20+</span>
+                    <span class="stat-label">Categories</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">98%</span>
+                    <span class="stat-label">Match Accuracy</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">50K+</span>
+                    <span class="stat-label">Students Guided</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Wave Decoration -->
+    <div class="hero-wave">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+            <path fill="var(--bg)" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,170.7C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        </svg>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features">
+    <div class="container">
+        <div class="section-header">
+            <h2>Why Choose CareerGuide AI?</h2>
+            <p>Comprehensive tools to help you make informed career decisions</p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i data-feather="brain"></i>
+                </div>
+                <h3>Psychometric Assessment</h3>
+                <p>60-question comprehensive test analyzing personality, interests, aptitudes, work style, and values.</p>
+                <a href="/psychometric-test" class="feature-link">Take Test →</a>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i data-feather="bar-chart-2"></i>
+                </div>
+                <h3>AI Career Matching</h3>
+                <p>Advanced algorithms match your profile with 300+ careers for personalized recommendations.</p>
+                <a href="/quiz" class="feature-link">Take Quiz →</a>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i data-feather="message-circle"></i>
+                </div>
+                <h3>AI Career Assistant</h3>
+                <p>24/7 chatbot to answer all your career questions and provide instant guidance.</p>
+                <a href="/chatbot" class="feature-link">Chat Now →</a>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i data-feather="git-compare"></i>
+                </div>
+                <h3>Career Comparison</h3>
+                <p>Compare up to 3 careers side-by-side to make informed decisions.</p>
+                <a href="/compare" class="feature-link">Compare →</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Career Categories Section -->
+<section class="categories">
+    <div class="container">
+        <div class="section-header">
+            <h2>Explore Career Categories</h2>
+            <p>Browse careers by industry and domain to find your perfect path</p>
+            <a href="/categories" class="view-all-link">View All Categories <i data-feather="arrow-right"></i></a>
+        </div>
+        
+        <div class="categories-grid" id="categoriesGrid">
+            <!-- Categories will be loaded dynamically -->
+            <div class="loading-spinner">
+                <i data-feather="loader"></i>
+                <p>Loading categories...</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Careers Section
+<section class="featured-careers">
+    <div class="container">
+        <div class="section-header">
+            <h2>🔥 Trending Careers</h2>
+            <p>High-demand careers with excellent growth prospects</p>
+        </div>
+        
+        <div class="careers-carousel" id="featuredCareers">
+            <div class="loading-spinner">
+                <i data-feather="loader"></i>
+                <p>Loading featured careers...</p>
+            </div>
+        </div>
+    </div>
+</section> -->
+
+<!-- How It Works Section -->
+<section class="how-it-works">
+    <div class="container">
+        <div class="section-header">
+            <h2>How It Works</h2>
+            <p>Simple steps to discover your perfect career</p>
+        </div>
+        
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-icon">
+                    <i data-feather="edit-3"></i>
+                </div>
+                <h3>Take Assessment</h3>
+                <p>Complete our comprehensive psychometric test or quick career quiz</p>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-icon">
+                    <i data-feather="cpu"></i>
+                </div>
+                <h3>AI Analysis</h3>
+                <p>Our AI analyzes your responses and matches with 300+ careers</p>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-icon">
+                    <i data-feather="check-circle"></i>
+                </div>
+                <h3>Get Matches</h3>
+                <p>Receive personalized career recommendations with match scores</p>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-icon">
+                    <i data-feather="compass"></i>
+                </div>
+                <h3>Explore & Decide</h3>
+                <p>Explore detailed career information and make informed decisions</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonials">
+    <div class="container">
+        <div class="section-header">
+            <h2>What Students Say</h2>
+            <p>Join thousands of students who found their perfect career path</p>
+        </div>
+        
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    <i data-feather="quote"></i>
+                    <p>"The psychometric test was incredibly accurate! It recommended careers I never considered before, and after researching them, I found my true calling."</p>
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <img src="https://ui-avatars.com/api/?name=Priya+Sharma&background=4A6FA5&color=fff" alt="Priya Sharma">
+                    </div>
+                    <div class="author-info">
+                        <h4>Priya Sharma</h4>
+                        <p>Now pursuing Data Science</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    <i data-feather="quote"></i>
+                    <p>"The AI chatbot answered all my questions about different careers. The detailed information about salaries and education requirements helped me plan my future."</p>
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <img src="https://ui-avatars.com/api/?name=Rahul+Verma&background=4A6FA5&color=fff" alt="Rahul Verma">
+                    </div>
+                    <div class="author-info">
+                        <h4>Rahul Verma</h4>
+                        <p>Engineering Student</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    <i data-feather="quote"></i>
+                    <p>"Comparing careers side-by-side helped me make the right decision. The match scores gave me confidence that I'm choosing the right path for my skills and interests."</p>
+                </div>
+                <div class="testimonial-author">
+                    <div class="author-avatar">
+                        <img src="https://ui-avatars.com/api/?name=Anjali+Patel&background=4A6FA5&color=fff" alt="Anjali Patel">
+                    </div>
+                    <div class="author-info">
+                        <h4>Anjali Patel</h4>
+                        <p>Medical Student</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Career Resources Section -->
+<section class="resources-preview">
+    <div class="container">
+        <div class="resources-content">
+            <div class="resources-text">
+                <h2>Free Learning Resources</h2>
+                <p>Access curated courses, certifications, and study materials to help you achieve your career goals.</p>
+                <ul class="resources-list">
+                    <li><i data-feather="check-circle"></i> 100+ Free Online Courses</li>
+                    <li><i data-feather="check-circle"></i> Professional Certifications Guide</li>
+                    <li><i data-feather="check-circle"></i> Exam Preparation Materials</li>
+                    <li><i data-feather="check-circle"></i> Skill Development Resources</li>
+                </ul>
+                <a href="/resources" class="btn btn-primary">Explore Resources →</a>
+            </div>
+            <div class="resources-image">
+                <img src="https://cdn-icons-png.flaticon.com/512/2997/2997662.png" alt="Learning Resources">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Ready to Discover Your Perfect Career?</h2>
+            <p>Take our comprehensive psychometric test and get personalized career recommendations today!</p>
+            <div class="cta-buttons">
+                <a href="/psychometric-test" class="btn btn-primary btn-large">
+                    <i data-feather="brain"></i>
+                    Start Psychometric Test
+                </a>
+                <a href="/quiz" class="btn btn-secondary btn-large">
+                    <i data-feather="zap"></i>
+                    Quick Career Quiz
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+// Load categories dynamically
+async function loadCategories() {
+    try {
+        const response = await fetch('/api/categories');
+        const categories = await response.json();
+        
+        const categoriesGrid = document.getElementById('categoriesGrid');
+        
+        // Define icons for different categories
+        const categoryIcons = {
+            'Healthcare': 'heart',
+            'Information Technology': 'cpu',
+            'Core Engineering': 'tool',
+            'Emerging Technologies': 'zap',
+            'Management': 'briefcase',
+            'Banking Finance': 'trending-up',
+            'Government': 'shield',
+            'Defence': 'flag',
+            'Education': 'book-open',
+            'Law': 'scale',
+            'Media': 'mic',
+            'Arts': 'palette',
+            'Entertainment': 'film',
+            'Skilled Trades': 'wrench',
+            'Agriculture': 'sun',
+            'Hospitality': 'coffee',
+            'Sports': 'award',
+            'Social Work': 'users',
+            'Science': 'globe',
+            'Retail': 'shopping-bag'
+        };
+        
+        // Show first 12 categories
+        const displayCategories = categories.slice(0, 12);
+        
+        categoriesGrid.innerHTML = displayCategories.map(category => `
+            <a href="/category/${encodeURIComponent(category)}" class="category-card">
+                <div class="category-icon">
+                    <i data-feather="${categoryIcons[category] || 'star'}"></i>
+                </div>
+                <h3>${escapeHtml(category)}</h3>
+                <span class="category-count">Explore →</span>
+            </a>
+        `).join('');
+        
+        feather.replace();
+        
+    } catch (error) {
+        console.error('Error loading categories:', error);
+        document.getElementById('categoriesGrid').innerHTML = `
+            <div class="error-message">
+                <i data-feather="alert-circle"></i>
+                <p>Failed to load categories. Please refresh the page.</p>
+            </div>
+        `;
+    }
+}
+
+// Load featured careers
+async function loadFeaturedCareers() {
+    try {
+        const response = await fetch('/api/featured-careers');
+        const careers = await response.json();
+        
+        const container = document.getElementById('featuredCareers');
+        
+        container.innerHTML = careers.map(career => `
+            <div class="career-card">
+                <div class="career-badge">${escapeHtml(career.Job_Outlook || 'Growing')}</div>
+                <h3>${escapeHtml(career.Career_Name)}</h3>
+                <p class="career-category">${escapeHtml(career.Category)}</p>
+                <div class="career-details">
+                    <div class="career-detail">
+                        <i data-feather="book-open"></i>
+                        <span>${escapeHtml(career.Min_Education || 'N/A')}</span>
+                    </div>
+                    <div class="career-detail">
+                        <i data-feather="trending-up"></i>
+                        <span>${escapeHtml(career.Entry_Salary_LPA || 'N/A')} LPA</span>
+                    </div>
+                </div>
+                <div class="career-skills">
+                    ${escapeHtml((career.Key_Technical_Skills || '').split(',').slice(0, 2).join(', '))}
+                </div>
+                <a href="/career/${career.Career_ID}" class="btn btn-small btn-primary">View Details</a>
+            </div>
+        `).join('');
+        
+        feather.replace();
+        
+    } catch (error) {
+        console.error('Error loading featured careers:', error);
+        document.getElementById('featuredCareers').innerHTML = `
+            <div class="error-message">
+                <i data-feather="alert-circle"></i>
+                <p>Failed to load featured careers. Please refresh the page.</p>
+            </div>
+        `;
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Load data on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadCategories();
+    loadFeaturedCareers();
+    
+    // Add animation to elements when they come into view
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+    
+    document.querySelectorAll('.feature-card, .category-card, .career-card, .step-card, .testimonial-card').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'all 0.6s ease-out';
+        observer.observe(el);
+    });
+});
+</script>
+
+<style>
+/* Hero Section */
+.hero {
+    position: relative;
+    background: linear-gradient(135deg, #4A6FA5 0%, #6B8C9E 100%);
+    padding: 80px 0 120px;
+    color: white;
+    overflow: hidden;
+}
+
+.hero-content {
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-badge {
+    margin-bottom: 24px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 8px 20px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 40px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    margin-bottom: 24px;
+    line-height: 1.2;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #E8A87C, #FFE6B3);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.hero-description {
+    font-size: 1.125rem;
+    margin-bottom: 40px;
+    opacity: 0.9;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 60px;
+}
+
+.hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    opacity: 0.8;
+}
+
+.hero-wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    line-height: 0;
+}
+
+/* Features Section */
+.features {
+    padding: 80px 0;
+    background: var(--bg, #F9F7F5);
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.section-header h2 {
+    font-size: 2.25rem;
+    margin-bottom: 16px;
+    color: var(--text, #2D3E50);
+}
+
+.section-header p {
+    color: var(--text-light, #6B7280);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.view-all-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    color: var(--primary, #4A6FA5);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.view-all-link i {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s;
+}
+
+.view-all-link:hover i {
+    transform: translateX(4px);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 32px;
+}
+
+.feature-card {
+    background: var(--surface, white);
+    padding: 32px;
+    border-radius: 20px;
+    text-align: center;
+    transition: all 0.3s;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+}
+
+.feature-icon {
+    width: 70px;
+    height: 70px;
+    background: rgba(74, 111, 165, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+}
+
+.feature-icon i {
+    width: 32px;
+    height: 32px;
+    color: var(--primary, #4A6FA5);
+}
+
+.feature-card h3 {
+    margin-bottom: 12px;
+    font-size: 1.25rem;
+}
+
+.feature-card p {
+    color: var(--text-light, #6B7280);
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.feature-link {
+    color: var(--primary, #4A6FA5);
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Categories Section */
+.categories {
+    padding: 80px 0;
+    background: var(--surface, white);
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.category-card {
+    background: var(--bg, #F9F7F5);
+    padding: 28px;
+    border-radius: 16px;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s;
+    display: block;
+}
+
+.category-card:hover {
+    transform: translateY(-4px);
+    background: var(--surface, white);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.category-icon {
+    width: 64px;
+    height: 64px;
+    background: rgba(74, 111, 165, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.category-icon i {
+    width: 32px;
+    height: 32px;
+    color: var(--primary, #4A6FA5);
+}
+
+.category-card h3 {
+    margin-bottom: 8px;
+    color: var(--text, #2D3E50);
+}
+
+.category-count {
+    color: var(--primary, #4A6FA5);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Featured Careers */
+.featured-careers {
+    padding: 80px 0;
+    background: var(--bg, #F9F7F5);
+}
+
+.careers-carousel {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.career-card {
+    background: var(--surface, white);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    transition: all 0.3s;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+.career-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+}
+
+.career-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 4px 12px;
+    background: #86A789;
+    color: white;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.career-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+    padding-right: 60px;
+}
+
+.career-category {
+    color: var(--secondary, #6B8C9E);
+    font-size: 0.875rem;
+    margin-bottom: 16px;
+}
+
+.career-details {
+    display: flex;
+    gap: 16px;
+    margin: 16px 0;
+}
+
+.career-detail {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    color: var(--text-light, #6B7280);
+}
+
+.career-detail i {
+    width: 16px;
+    height: 16px;
+}
+
+.career-skills {
+    font-size: 0.75rem;
+    color: var(--text-light, #6B7280);
+    margin: 12px 0;
+    padding: 8px 0;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* How It Works */
+.how-it-works {
+    padding: 80px 0;
+    background: var(--surface, white);
+}
+
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 32px;
+}
+
+.step-card {
+    text-align: center;
+    position: relative;
+}
+
+.step-number {
+    width: 48px;
+    height: 48px;
+    background: var(--primary, #4A6FA5);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 auto 20px;
+}
+
+.step-icon {
+    margin-bottom: 20px;
+}
+
+.step-icon i {
+    width: 48px;
+    height: 48px;
+    color: var(--primary, #4A6FA5);
+}
+
+.step-card h3 {
+    margin-bottom: 12px;
+}
+
+.step-card p {
+    color: var(--text-light, #6B7280);
+}
+
+/* Testimonials */
+.testimonials {
+    padding: 80px 0;
+    background: var(--bg, #F9F7F5);
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 32px;
+}
+
+.testimonial-card {
+    background: var(--surface, white);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+.testimonial-content {
+    margin-bottom: 24px;
+}
+
+.testimonial-content i {
+    width: 32px;
+    height: 32px;
+    color: var(--primary, #4A6FA5);
+    margin-bottom: 16px;
+}
+
+.testimonial-content p {
+    font-style: italic;
+    line-height: 1.6;
+}
+
+.testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.author-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.author-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.author-info h4 {
+    margin-bottom: 4px;
+    font-size: 1rem;
+}
+
+.author-info p {
+    font-size: 0.875rem;
+    color: var(--text-light, #6B7280);
+}
+
+/* Resources Preview */
+.resources-preview {
+    padding: 80px 0;
+    background: var(--surface, white);
+}
+
+.resources-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+}
+
+.resources-text h2 {
+    font-size: 2rem;
+    margin-bottom: 16px;
+}
+
+.resources-text p {
+    color: var(--text-light, #6B7280);
+    margin-bottom: 24px;
+}
+
+.resources-list {
+    list-style: none;
+    margin-bottom: 32px;
+}
+
+.resources-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.resources-list i {
+    width: 20px;
+    height: 20px;
+    color: #86A789;
+}
+
+.resources-image {
+    text-align: center;
+}
+
+.resources-image img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* CTA Section */
+.cta-section {
+    padding: 80px 0;
+    background: linear-gradient(135deg, #4A6FA5 0%, #6B8C9E 100%);
+    color: white;
+    text-align: center;
+}
+
+.cta-content h2 {
+    font-size: 2rem;
+    margin-bottom: 16px;
+}
+
+.cta-content p {
+    margin-bottom: 32px;
+    opacity: 0.9;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border-radius: 40px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+}
+
+.btn i {
+    width: 20px;
+    height: 20px;
+}
+
+.btn-primary {
+    background: white;
+    color: var(--primary, #4A6FA5);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    backdrop-filter: blur(10px);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+}
+
+.btn-outline:hover {
+    background: white;
+    color: var(--primary, #4A6FA5);
+    transform: translateY(-2px);
+}
+
+.btn-large {
+    padding: 14px 36px;
+    font-size: 1rem;
+}
+
+.btn-small {
+    padding: 8px 20px;
+    font-size: 0.875rem;
+}
+
+/* Loading & Error States */
+.loading-spinner {
+    text-align: center;
+    padding: 48px;
+}
+
+.loading-spinner i {
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    color: var(--primary, #4A6FA5);
+}
+
+.error-message {
+    text-align: center;
+    padding: 48px;
+    color: var(--error, #E27C7C);
+}
+
+.error-message i {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .resources-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    
+    .resources-list {
+        text-align: left;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero {
+        padding: 60px 0 100px;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-description {
+        font-size: 1rem;
+    }
+    
+    .hero-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .hero-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .hero-stats {
+        gap: 24px;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
+    .features-grid,
+    .categories-grid,
+    .careers-carousel,
+    .testimonials-grid,
+    .steps-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-header h2 {
+        font-size: 1.75rem;
+    }
+    
+    .cta-content h2 {
+        font-size: 1.5rem;
+    }
+    
+    .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .cta-buttons .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 1.75rem;
+    }
+    
+    .category-card {
+        padding: 20px;
+    }
+    
+    .career-card {
+        padding: 20px;
+    }
+    
+    .testimonial-card {
+        padding: 20px;
+    }
+}
+</style>
+{% endblock %}

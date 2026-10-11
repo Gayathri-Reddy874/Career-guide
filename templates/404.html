@@ -1,0 +1,57 @@
+<!-- templates/404.html -->
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - CareerGuide AI{% endblock %}
+
+{% block content %}
+<section class="error-page">
+    <div class="container">
+        <div class="error-content">
+            <div class="error-code">404</div>
+            <h1>Page Not Found</h1>
+            <p>Oops! The page you're looking for doesn't exist or has been moved.</p>
+            <div class="error-actions">
+                <a href="/" class="btn btn-primary">
+                    <i data-feather="home"></i>
+                    Go Home
+                </a>
+                <a href="/quiz" class="btn btn-outline">
+                    <i data-feather="help-circle"></i>
+                    Take Career Quiz
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.error-page {
+    padding: 80px 0;
+    text-align: center;
+}
+
+.error-code {
+    font-size: 6rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 16px;
+}
+
+.error-content h1 {
+    font-size: 2rem;
+    margin-bottom: 16px;
+}
+
+.error-content p {
+    color: var(--text-light);
+    margin-bottom: 32px;
+}
+
+.error-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+</style>
+{% endblock %}

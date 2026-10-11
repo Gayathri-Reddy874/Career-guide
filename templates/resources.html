@@ -1,0 +1,457 @@
+{% extends "base.html" %}
+
+{% block title %}Learning Resources - CareerGuide AI{% endblock %}
+
+{% block content %}
+<section class="resources-section">
+    <div class="container">
+        <div class="resources-header">
+            <h1>Learning Resources</h1>
+            <p>Explore courses, certifications, and materials to help you achieve your career goals</p>
+        </div>
+        
+        <div class="resources-filters">
+            <input type="text" id="resourceSearch" placeholder="Search resources..." class="search-input">
+            <select id="categoryFilter" class="filter-select">
+                <option value="all">All Categories</option>
+                <option value="technology">Technology</option>
+                <option value="business">Business & Management</option>
+                <option value="healthcare">Healthcare</option>
+                <option value="creative">Creative Arts</option>
+                <option value="government">Government & Defence</option>
+                <option value="language">Language & Communication</option>
+            </select>
+        </div>
+        
+        <div class="resource-grid" id="resourceGrid">
+            <!-- Resources will be loaded via JavaScript -->
+            <div class="loading-spinner">
+                <i data-feather="loader"></i>
+                <p>Loading resources...</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    const resources = [
+        {
+            id: 1,
+            title: "Google IT Support Professional Certificate",
+            provider: "Google",
+            category: "technology",
+            type: "Certificate",
+            duration: "6 months",
+            level: "Beginner",
+            url: "https://www.coursera.org/professional-certificates/google-it-support",
+            description: "Learn IT support skills including troubleshooting, customer service, networking, and security.",
+            icon: "cpu",
+            price: "Free (Audit) / Paid (Certificate)"
+        },
+        {
+            id: 2,
+            title: "Meta Frontend Developer Professional Certificate",
+            provider: "Meta",
+            category: "technology",
+            type: "Certificate",
+            duration: "7 months",
+            level: "Beginner",
+            url: "https://www.coursera.org/professional-certificates/meta-front-end-developer",
+            description: "Learn to build interactive websites and applications using React, HTML, CSS, and JavaScript.",
+            icon: "code",
+            price: "Free (Audit) / Paid (Certificate)"
+        },
+        {
+            id: 3,
+            title: "IBM Data Science Professional Certificate",
+            provider: "IBM",
+            category: "technology",
+            type: "Certificate",
+            duration: "11 months",
+            level: "Intermediate",
+            url: "https://www.coursera.org/professional-certificates/ibm-data-science",
+            description: "Master data science skills including Python, SQL, machine learning, and data visualization.",
+            icon: "bar-chart-2",
+            price: "Free (Audit) / Paid (Certificate)"
+        },
+        {
+            id: 4,
+            title: "Project Management Professional (PMP)",
+            provider: "PMI",
+            category: "business",
+            type: "Certification",
+            duration: "Variable",
+            level: "Advanced",
+            url: "https://www.pmi.org/pmi/certifications/project-management-pmp",
+            description: "Globally recognized project management certification for experienced professionals.",
+            icon: "briefcase",
+            price: "$$$"
+        },
+        {
+            id: 5,
+            title: "Chartered Accountant (CA)",
+            provider: "ICAI",
+            category: "business",
+            type: "Professional Course",
+            duration: "4-5 years",
+            level: "Advanced",
+            url: "https://www.icai.org/",
+            description: "Premier accounting qualification in India covering auditing, taxation, and financial management.",
+            icon: "trending-up",
+            price: "$$"
+        },
+        {
+            id: 6,
+            title: "NEET Preparation",
+            provider: "Multiple",
+            category: "healthcare",
+            type: "Exam Prep",
+            duration: "1-2 years",
+            level: "Advanced",
+            url: "https://neet.nta.nic.in/",
+            description: "National Eligibility cum Entrance Test for medical and dental courses in India.",
+            icon: "heart",
+            price: "Varies"
+        },
+        {
+            id: 7,
+            title: "UPSC Civil Services Preparation",
+            provider: "UPSC",
+            category: "government",
+            type: "Exam Prep",
+            duration: "1-2 years",
+            level: "Advanced",
+            url: "https://upsc.gov.in/",
+            description: "Comprehensive preparation for India's premier civil services examination.",
+            icon: "flag",
+            price: "Varies"
+        },
+        {
+            id: 8,
+            title: "Certified Ethical Hacker (CEH)",
+            provider: "EC-Council",
+            category: "technology",
+            type: "Certification",
+            duration: "3-6 months",
+            level: "Intermediate",
+            url: "https://www.eccouncil.org/programs/certified-ethical-hacker-ceh/",
+            description: "Learn ethical hacking techniques and cybersecurity skills.",
+            icon: "shield",
+            price: "$$$"
+        },
+        {
+            id: 9,
+            title: "UI/UX Design Specialization",
+            provider: "Google",
+            category: "creative",
+            type: "Certificate",
+            duration: "6 months",
+            level: "Beginner",
+            url: "https://www.coursera.org/professional-certificates/google-ux-design",
+            description: "Learn user experience design principles, wireframing, and prototyping.",
+            icon: "palette",
+            price: "Free (Audit) / Paid (Certificate)"
+        },
+        {
+            id: 10,
+            title: "English Communication Skills",
+            provider: "British Council",
+            category: "language",
+            type: "Course",
+            duration: "3 months",
+            level: "All Levels",
+            url: "https://www.britishcouncil.in/english",
+            description: "Improve English language skills for professional and academic success.",
+            icon: "message-circle",
+            price: "$$"
+        },
+        {
+            id: 11,
+            title: "AWS Certified Solutions Architect",
+            provider: "Amazon Web Services",
+            category: "technology",
+            type: "Certification",
+            duration: "3-6 months",
+            level: "Intermediate",
+            url: "https://aws.amazon.com/certification/certified-solutions-architect-associate/",
+            description: "Validate expertise in designing distributed systems on AWS.",
+            icon: "cloud",
+            price: "$$$"
+        },
+        {
+            id: 12,
+            title: "Digital Marketing Specialization",
+            provider: "University of Illinois",
+            category: "business",
+            type: "Certificate",
+            duration: "8 months",
+            level: "Beginner",
+            url: "https://www.coursera.org/specializations/digital-marketing",
+            description: "Master digital marketing strategies including SEO, social media, and analytics.",
+            icon: "trending-up",
+            price: "Free (Audit) / Paid (Certificate)"
+        }
+    ];
+    
+    let currentFilter = 'all';
+    let currentSearch = '';
+    
+    function renderResources() {
+        const grid = document.getElementById('resourceGrid');
+        
+        let filtered = resources;
+        
+        // Apply category filter
+        if (currentFilter !== 'all') {
+            filtered = filtered.filter(r => r.category === currentFilter);
+        }
+        
+        // Apply search filter
+        if (currentSearch) {
+            const searchLower = currentSearch.toLowerCase();
+            filtered = filtered.filter(r => 
+                r.title.toLowerCase().includes(searchLower) ||
+                r.description.toLowerCase().includes(searchLower) ||
+                r.provider.toLowerCase().includes(searchLower)
+            );
+        }
+        
+        if (filtered.length === 0) {
+            grid.innerHTML = `
+                <div class="no-results">
+                    <i data-feather="search"></i>
+                    <p>No resources found. Try a different search term or category.</p>
+                </div>
+            `;
+            feather.replace();
+            return;
+        }
+        
+        grid.innerHTML = filtered.map(resource => `
+            <div class="resource-card fade-in-up">
+                <div class="resource-icon">
+                    <i data-feather="${resource.icon}"></i>
+                </div>
+                <div class="resource-content">
+                    <h3>${escapeHtml(resource.title)}</h3>
+                    <div class="resource-meta">
+                        <span class="resource-provider">${escapeHtml(resource.provider)}</span>
+                        <span class="resource-type">${escapeHtml(resource.type)}</span>
+                        <span class="resource-duration">${escapeHtml(resource.duration)}</span>
+                    </div>
+                    <p class="resource-description">${escapeHtml(resource.description)}</p>
+                    <div class="resource-footer">
+                        <span class="resource-level ${resource.level.toLowerCase()}">${resource.level}</span>
+                        <span class="resource-price">${resource.price}</span>
+                        <a href="${resource.url}" target="_blank" class="btn btn-small btn-primary">Enroll Now</a>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        feather.replace();
+    }
+    
+    // Search functionality
+    const searchInput = document.getElementById('resourceSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            currentSearch = e.target.value;
+            renderResources();
+        });
+    }
+    
+    // Category filter
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', (e) => {
+            currentFilter = e.target.value;
+            renderResources();
+        });
+    }
+    
+    // Initial render
+    renderResources();
+</script>
+
+<style>
+.resources-section {
+    padding: 48px 0;
+}
+
+.resources-header {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.resources-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 16px;
+}
+
+.resources-filters {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 40px;
+    font-family: inherit;
+    font-size: 1rem;
+    background: var(--surface);
+}
+
+.filter-select {
+    padding: 12px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 40px;
+    font-family: inherit;
+    background: var(--surface);
+    cursor: pointer;
+}
+
+.resource-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 24px;
+}
+
+.resource-card {
+    background: var(--surface);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    transition: all 0.3s;
+    display: flex;
+    gap: 16px;
+}
+
+.resource-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+}
+
+.resource-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    background: rgba(74, 111, 165, 0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.resource-icon i {
+    width: 24px;
+    height: 24px;
+    color: var(--primary);
+}
+
+.resource-content {
+    flex: 1;
+}
+
+.resource-content h3 {
+    font-size: 1.125rem;
+    margin-bottom: 8px;
+}
+
+.resource-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 0.75rem;
+}
+
+.resource-provider,
+.resource-type,
+.resource-duration {
+    color: var(--text-light);
+}
+
+.resource-description {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.resource-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.resource-level {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.resource-level.beginner {
+    background: #d4edda;
+    color: #155724;
+}
+
+.resource-level.intermediate {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.resource-level.advanced {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.resource-price {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.resource-footer .btn {
+    margin-left: auto;
+}
+
+@media (max-width: 768px) {
+    .resource-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .resource-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .resource-icon {
+        margin: 0 auto;
+    }
+    
+    .resource-footer {
+        justify-content: center;
+    }
+    
+    .resource-footer .btn {
+        margin-left: 0;
+    }
+    
+    .resources-filters {
+        flex-direction: column;
+    }
+    
+    .search-input,
+    .filter-select {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

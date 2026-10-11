@@ -1,0 +1,1239 @@
+<!-- templates/psychometric_test.html -->
+{% extends "base.html" %}
+
+{% block title %}Psychometric Career Assessment - CareerGuide AI{% endblock %}
+
+{% block content %}
+<div class="psychometric-wrapper">
+    <div class="container">
+        <!-- Header Section -->
+        <div class="test-header">
+            <h1>🧠 Psychometric Career Assessment</h1>
+            <p>A complete 60-question test analyzing your personality, interests, aptitudes, work style, and values to find your ideal career match from 300+ careers</p>
+            
+            <div class="test-stats">
+                <div class="stat-card">
+                    <i data-feather="clock"></i>
+                    <span>15-20 min</span>
+                </div>
+                <div class="stat-card">
+                    <i data-feather="file-text"></i>
+                    <span>60 Questions</span>
+                </div>
+                <div class="stat-card">
+                    <i data-feather="award"></i>
+                    <span>300+ Careers</span>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button type="button" class="btn-action btn-danger" id="resetAllBtn">
+                    <i data-feather="trash-2"></i> Reset All Answers
+                </button>
+                <button type="button" class="btn-action btn-success" id="saveAnswersBtn">
+                    <i data-feather="save"></i> Save Progress
+                </button>
+                <button type="button" class="btn-action btn-info" id="loadAnswersBtn">
+                    <i data-feather="folder"></i> Load Progress
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-wrapper">
+            <div class="progress-label">
+                <span>📊 Overall Progress</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-count" id="answeredCount">0 of 60 questions answered</div>
+        </div>
+
+        <!-- Section Tabs -->
+        <div class="section-tabs">
+            <button class="tab active" data-tab="1">1. Personality</button>
+            <button class="tab" data-tab="2">2. Interests</button>
+            <button class="tab" data-tab="3">3. Aptitude</button>
+            <button class="tab" data-tab="4">4. Work Style</button>
+            <button class="tab" data-tab="5">5. Values</button>
+        </div>
+
+        <!-- Test Form -->
+        <form id="testForm">
+            <!-- Section 1: Personality - 15 Questions -->
+            <div class="test-section" id="section1">
+                <div class="section-header">
+                    <h2>Personality Assessment</h2>
+                    <button type="button" class="clear-section" data-section="1">
+                        <i data-feather="x-circle"></i> Clear Section
+                    </button>
+                </div>
+                <p class="section-desc">Rate how much you agree with each statement (1 = Strongly Disagree, 5 = Strongly Agree)</p>
+                
+                {% for i in range(1, 16) %}
+                <div class="question-card">
+                    <div class="question-number">Q{{ i }}</div>
+                    <div class="question-text">{{ personality_questions[i-1] }}</div>
+                    <div class="rating-buttons">
+                        <label class="rating-btn">
+                            <input type="radio" name="p{{ i }}" value="1">
+                            <span>1<br><small>Strongly<br>Disagree</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="p{{ i }}" value="2">
+                            <span>2<br><small>Disagree</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="p{{ i }}" value="3">
+                            <span>3<br><small>Neutral</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="p{{ i }}" value="4">
+                            <span>4<br><small>Agree</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="p{{ i }}" value="5">
+                            <span>5<br><small>Strongly<br>Agree</small></span>
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Section 2: Interests - 15 Questions -->
+            <div class="test-section" id="section2" style="display: none;">
+                <div class="section-header">
+                    <h2>Career Interest Inventory</h2>
+                    <button type="button" class="clear-section" data-section="2">
+                        <i data-feather="x-circle"></i> Clear Section
+                    </button>
+                </div>
+                <p class="section-desc">Rate your interest level in each activity (1 = Not Interested, 5 = Extremely Interested)</p>
+                
+                {% for i in range(1, 16) %}
+                <div class="question-card">
+                    <div class="question-number">Q{{ i+15 }}</div>
+                    <div class="question-text">{{ interest_questions[i-1] }}</div>
+                    <div class="rating-buttons">
+                        <label class="rating-btn">
+                            <input type="radio" name="i{{ i }}" value="1">
+                            <span>1<br><small>Not<br>Interested</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="i{{ i }}" value="2">
+                            <span>2<br><small>Slightly</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="i{{ i }}" value="3">
+                            <span>3<br><small>Moderate</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="i{{ i }}" value="4">
+                            <span>4<br><small>Very</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="i{{ i }}" value="5">
+                            <span>5<br><small>Extremely</small></span>
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Section 3: Aptitude - 15 Questions -->
+            <div class="test-section" id="section3" style="display: none;">
+                <div class="section-header">
+                    <h2>Aptitude Assessment</h2>
+                    <button type="button" class="clear-section" data-section="3">
+                        <i data-feather="x-circle"></i> Clear Section
+                    </button>
+                </div>
+                <p class="section-desc">Rate your proficiency level (1 = Novice, 5 = Expert)</p>
+                
+                {% for i in range(1, 16) %}
+                <div class="question-card">
+                    <div class="question-number">Q{{ i+30 }}</div>
+                    <div class="question-text">{{ aptitude_questions[i-1] }}</div>
+                    <div class="rating-buttons">
+                        <label class="rating-btn">
+                            <input type="radio" name="a{{ i }}" value="1">
+                            <span>1<br><small>Novice</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="a{{ i }}" value="2">
+                            <span>2<br><small>Beginner</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="a{{ i }}" value="3">
+                            <span>3<br><small>Intermediate</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="a{{ i }}" value="4">
+                            <span>4<br><small>Advanced</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="a{{ i }}" value="5">
+                            <span>5<br><small>Expert</small></span>
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Section 4: Work Style - 10 Questions -->
+            <div class="test-section" id="section4" style="display: none;">
+                <div class="section-header">
+                    <h2>Work Style Preferences</h2>
+                    <button type="button" class="clear-section" data-section="4">
+                        <i data-feather="x-circle"></i> Clear Section
+                    </button>
+                </div>
+                <p class="section-desc">Rate how important each factor is (1 = Not Important, 5 = Extremely Important)</p>
+                
+                {% for i in range(1, 11) %}
+                <div class="question-card">
+                    <div class="question-number">Q{{ i+45 }}</div>
+                    <div class="question-text">{{ work_style_questions[i-1] }}</div>
+                    <div class="rating-buttons">
+                        <label class="rating-btn">
+                            <input type="radio" name="w{{ i }}" value="1">
+                            <span>1<br><small>Not<br>Important</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="w{{ i }}" value="2">
+                            <span>2<br><small>Slightly</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="w{{ i }}" value="3">
+                            <span>3<br><small>Moderate</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="w{{ i }}" value="4">
+                            <span>4<br><small>Very</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="w{{ i }}" value="5">
+                            <span>5<br><small>Extremely</small></span>
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Section 5: Values - 10 Questions -->
+            <div class="test-section" id="section5" style="display: none;">
+                <div class="section-header">
+                    <h2>Core Values Assessment</h2>
+                    <button type="button" class="clear-section" data-section="5">
+                        <i data-feather="x-circle"></i> Clear Section
+                    </button>
+                </div>
+                <p class="section-desc">Rate how important each value is to you (1 = Not Important, 5 = Extremely Important)</p>
+                
+                {% for i in range(1, 11) %}
+                <div class="question-card">
+                    <div class="question-number">Q{{ i+55 }}</div>
+                    <div class="question-text">{{ values_questions[i-1] }}</div>
+                    <div class="rating-buttons">
+                        <label class="rating-btn">
+                            <input type="radio" name="v{{ i }}" value="1">
+                            <span>1<br><small>Not<br>Important</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="v{{ i }}" value="2">
+                            <span>2<br><small>Slightly</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="v{{ i }}" value="3">
+                            <span>3<br><small>Moderate</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="v{{ i }}" value="4">
+                            <span>4<br><small>Very</small></span>
+                        </label>
+                        <label class="rating-btn">
+                            <input type="radio" name="v{{ i }}" value="5">
+                            <span>5<br><small>Extremely</small></span>
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="navigation-buttons">
+                <button type="button" class="nav-btn prev" id="prevBtn" disabled>
+                    <i data-feather="arrow-left"></i> Previous Section
+                </button>
+                <button type="button" class="nav-btn next" id="nextBtn">
+                    Next Section <i data-feather="arrow-right"></i>
+                </button>
+                <button type="submit" class="nav-btn submit" id="submitBtn" style="display: none;">
+                    Get Career Matches <i data-feather="arrow-right"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Reset Confirmation Modal -->
+<div id="resetModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>⚠️ Reset All Answers</h3>
+            <button class="modal-close" onclick="closeResetModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to reset ALL your answers?</p>
+            <p class="warning-text">This will clear all 60 questions and cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeResetModal()">Cancel</button>
+            <button class="btn-confirm" id="confirmResetBtn">Yes, Reset Everything</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentSection = 1;
+const totalSections = 5;
+let allAnswers = {};
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadFromStorage();
+    updateProgress();
+    setupEventListeners();
+    showSection(1);
+});
+
+function setupEventListeners() {
+    // Tab clicks
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const sectionNum = parseInt(tab.dataset.tab);
+            showSection(sectionNum);
+        });
+    });
+    
+    // Navigation buttons
+    document.getElementById('prevBtn').addEventListener('click', () => showSection(currentSection - 1));
+    document.getElementById('nextBtn').addEventListener('click', () => showSection(currentSection + 1));
+    document.getElementById('submitBtn').addEventListener('click', submitTest);
+    
+    // Action buttons
+    document.getElementById('resetAllBtn').addEventListener('click', showResetModal);
+    document.getElementById('confirmResetBtn').addEventListener('click', resetAllAnswers);
+    document.getElementById('saveAnswersBtn').addEventListener('click', saveToStorage);
+    document.getElementById('loadAnswersBtn').addEventListener('click', loadFromStorage);
+    
+    // Clear section buttons
+    document.querySelectorAll('.clear-section').forEach(btn => {
+        btn.addEventListener('click', () => clearSection(parseInt(btn.dataset.section)));
+    });
+    
+    // Radio button changes
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            saveCurrentAnswers();
+            updateProgress();
+        });
+    });
+}
+
+function showSection(sectionNum) {
+    if (sectionNum < 1 || sectionNum > totalSections) return;
+    
+    // Save current section answers
+    saveCurrentAnswers();
+    
+    // Hide all sections
+    for (let i = 1; i <= totalSections; i++) {
+        document.getElementById(`section${i}`).style.display = 'none';
+    }
+    
+    // Show selected section
+    document.getElementById(`section${sectionNum}`).style.display = 'block';
+    
+    // Update tabs
+    document.querySelectorAll('.tab').forEach((tab, index) => {
+        if (index + 1 === sectionNum) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+    
+    currentSection = sectionNum;
+    
+    // Update navigation buttons
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    prevBtn.disabled = (sectionNum === 1);
+    
+    if (sectionNum === totalSections) {
+        nextBtn.style.display = 'none';
+        submitBtn.style.display = 'flex';
+    } else {
+        nextBtn.style.display = 'flex';
+        submitBtn.style.display = 'none';
+    }
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function saveCurrentAnswers() {
+    const currentSectionEl = document.getElementById(`section${currentSection}`);
+    const radios = currentSectionEl.querySelectorAll('input[type="radio"]:checked');
+    
+    radios.forEach(radio => {
+        allAnswers[radio.name] = radio.value;
+    });
+}
+
+function updateProgress() {
+    let answered = 0;
+    const total = 60;
+    
+    // Count all answered questions
+    for (let s = 1; s <= totalSections; s++) {
+        const sectionEl = document.getElementById(`section${s}`);
+        const answeredInSection = sectionEl.querySelectorAll('input[type="radio"]:checked').length;
+        answered += answeredInSection;
+    }
+    
+    const percent = Math.round((answered / total) * 100);
+    document.getElementById('progressFill').style.width = `${percent}%`;
+    document.getElementById('progressPercent').textContent = `${percent}%`;
+    document.getElementById('answeredCount').textContent = `${answered} of ${total} questions answered`;
+    
+    // Update tab completion indicators
+    for (let s = 1; s <= totalSections; s++) {
+        const sectionEl = document.getElementById(`section${s}`);
+        const totalInSection = sectionEl.querySelectorAll('.question-card').length;
+        const answeredInSection = sectionEl.querySelectorAll('input[type="radio"]:checked').length;
+        const tab = document.querySelector(`.tab[data-tab="${s}"]`);
+        
+        if (tab) {
+            tab.classList.remove('complete', 'partial');
+            if (answeredInSection === totalInSection) {
+                tab.classList.add('complete');
+            } else if (answeredInSection > 0) {
+                tab.classList.add('partial');
+            }
+        }
+    }
+}
+
+function clearSection(sectionNum) {
+    if (confirm(`Are you sure you want to clear all answers in Section ${sectionNum}?`)) {
+        const sectionEl = document.getElementById(`section${sectionNum}`);
+        const radios = sectionEl.querySelectorAll('input[type="radio"]');
+        
+        radios.forEach(radio => {
+            radio.checked = false;
+            if (allAnswers[radio.name]) {
+                delete allAnswers[radio.name];
+            }
+        });
+        
+        saveToStorage();
+        updateProgress();
+        showToast(`Section ${sectionNum} cleared successfully!`, 'success');
+    }
+}
+
+function resetAllAnswers() {
+    // Clear all radio buttons
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.checked = false;
+    });
+    
+    // Clear answers object
+    allAnswers = {};
+    
+    // Clear localStorage
+    localStorage.removeItem('psychometricAnswers');
+    
+    // Reset to first section
+    showSection(1);
+    
+    updateProgress();
+    showToast('All answers cleared! You can now retake the test.', 'success');
+    closeResetModal();
+}
+
+function saveToStorage() {
+    saveCurrentAnswers();
+    localStorage.setItem('psychometricAnswers', JSON.stringify(allAnswers));
+    showToast('Progress saved successfully!', 'success');
+}
+
+function loadFromStorage() {
+    const saved = localStorage.getItem('psychometricAnswers');
+    if (saved) {
+        try {
+            const savedAnswers = JSON.parse(saved);
+            
+            // Clear all first
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.checked = false;
+            });
+            
+            // Load saved answers
+            Object.keys(savedAnswers).forEach(key => {
+                const radio = document.querySelector(`input[name="${key}"][value="${savedAnswers[key]}"]`);
+                if (radio) {
+                    radio.checked = true;
+                }
+            });
+            
+            allAnswers = savedAnswers;
+            updateProgress();
+            showToast('Progress loaded successfully!', 'success');
+        } catch(e) {
+            showToast('Error loading saved progress', 'error');
+        }
+    } else {
+        showToast('No saved progress found', 'info');
+    }
+}
+
+function showResetModal() {
+    document.getElementById('resetModal').style.display = 'flex';
+}
+
+function closeResetModal() {
+    document.getElementById('resetModal').style.display = 'none';
+}
+
+function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `<span>${message}</span>`;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+async function submitTest(event) {
+    event.preventDefault();
+    
+    // Check if all questions are answered
+    const totalAnswered = document.querySelectorAll('input[type="radio"]:checked').length;
+    if (totalAnswered < 60) {
+        showToast(`Please answer all 60 questions. You've answered ${totalAnswered}.`, 'warning');
+        return;
+    }
+    
+    saveCurrentAnswers();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i data-feather="loader"></i> Analyzing your profile...';
+    
+    try {
+        const results = processResults();
+        
+        const response = await fetch('/api/psychometric/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(results)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            sessionStorage.setItem('psychometricResults', JSON.stringify(data));
+            window.location.href = '/psychometric-results';
+        } else {
+            throw new Error(data.error || 'Analysis failed');
+        }
+    } catch (error) {
+        showToast('Something went wrong. Please try again.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Get Career Matches <i data-feather="arrow-right"></i>';
+    }
+}
+
+function processResults() {
+    // Calculate personality scores
+    const personality = {
+        extraversion: calculateScore('p', [1, 6, 11]),
+        agreeableness: calculateScore('p', [2, 7, 12]),
+        conscientiousness: calculateScore('p', [3, 8, 13]),
+        neuroticism: calculateScore('p', [4, 9, 14]),
+        openness: calculateScore('p', [5, 10, 15])
+    };
+    
+    // Calculate interest scores (RIASEC)
+    const interests = {
+        realistic: calculateScore('i', [2, 8, 14]),
+        investigative: calculateScore('i', [1, 6, 11]),
+        artistic: calculateScore('i', [5, 10, 15]),
+        social: calculateScore('i', [3, 7, 12]),
+        enterprising: calculateScore('i', [4, 9, 13]),
+        conventional: calculateScore('i', [15])
+    };
+    
+    // Calculate aptitude scores
+    const aptitudes = {
+        analytical: calculateScore('a', [1, 3, 7, 8, 15]),
+        creative: calculateScore('a', [4, 9, 13]),
+        technical: calculateScore('a', [5, 11, 12]),
+        interpersonal: calculateScore('a', [6, 10, 14]),
+        organizational: calculateScore('a', [11])
+    };
+    
+    // Calculate work style scores
+    const workStyles = {
+        flexibility: calculateScore('w', [1, 3]),
+        collaboration: calculateScore('w', [2]),
+        stability: calculateScore('w', [4]),
+        travel: calculateScore('w', [5]),
+        work_life_balance: calculateScore('w', [6]),
+        financial_rewards: calculateScore('w', [7, 8]),
+        learning: calculateScore('w', [9]),
+        social_impact: calculateScore('w', [10])
+    };
+    
+    // Calculate values scores
+    const values = {
+        security: calculateScore('v', [1]),
+        altruism: calculateScore('v', [2, 9, 10]),
+        prestige: calculateScore('v', [3]),
+        creativity: calculateScore('v', [4]),
+        autonomy: calculateScore('v', [5]),
+        growth: calculateScore('v', [6, 8]),
+        balance: calculateScore('v', [7]),
+        sustainability: calculateScore('v', [9]),
+        justice: calculateScore('v', [10])
+    };
+    
+    return { personality, interests, aptitudes, workStyles, values };
+}
+
+function calculateScore(prefix, indices) {
+    let total = 0;
+    let count = 0;
+    
+    indices.forEach(idx => {
+        const key = `${prefix}${idx}`;
+        if (allAnswers[key]) {
+            total += parseInt(allAnswers[key]);
+            count++;
+        }
+    });
+    
+    return count > 0 ? total / count : 3;
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('resetModal');
+    if (event.target === modal) {
+        closeResetModal();
+    }
+}
+</script>
+
+<style>
+/* Psychometric Page Styles */
+.psychometric-wrapper {
+    padding-top: 100px;
+    padding-bottom: 60px;
+    background: var(--bg, #F9F7F5);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Test Header */
+.test-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.test-header h1 {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    color: var(--text, #2D3E50);
+}
+
+.test-header p {
+    color: var(--text-light, #6B7280);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.test-stats {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    background: var(--surface, white);
+    border-radius: 40px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.stat-card i {
+    width: 20px;
+    height: 20px;
+    color: var(--primary, #4A6FA5);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    font-family: inherit;
+}
+
+.btn-danger {
+    background: transparent;
+    border: 2px solid #E27C7C;
+    color: #E27C7C;
+}
+
+.btn-danger:hover {
+    background: #E27C7C;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background: transparent;
+    border: 2px solid #86A789;
+    color: #86A789;
+}
+
+.btn-success:hover {
+    background: #86A789;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-info {
+    background: transparent;
+    border: 2px solid #4A6FA5;
+    color: #4A6FA5;
+}
+
+.btn-info:hover {
+    background: #4A6FA5;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Progress Wrapper */
+.progress-wrapper {
+    background: var(--surface, white);
+    padding: 20px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.progress-bar-container {
+    height: 10px;
+    background: #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4A6FA5, #86A789);
+    border-radius: 10px;
+    transition: width 0.3s;
+    width: 0%;
+}
+
+.progress-count {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.75rem;
+    color: var(--text-light, #6B7280);
+}
+
+/* Section Tabs */
+.section-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.tab {
+    flex: 1;
+    padding: 12px 16px;
+    background: var(--surface, white);
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: inherit;
+    font-size: 0.875rem;
+}
+
+.tab.active {
+    background: var(--primary, #4A6FA5);
+    border-color: var(--primary, #4A6FA5);
+    color: white;
+}
+
+.tab.complete {
+    border-color: #86A789;
+    background: #86A78920;
+}
+
+.tab.partial {
+    border-color: #E8A87C;
+    background: #E8A87C20;
+}
+
+/* Test Sections */
+.test-section {
+    background: var(--surface, white);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 1.35rem;
+}
+
+.section-desc {
+    color: var(--text-light, #6B7280);
+    margin-bottom: 24px;
+    font-size: 0.875rem;
+}
+
+.clear-section {
+    background: transparent;
+    border: 1px solid #E27C7C;
+    color: #E27C7C;
+    padding: 6px 16px;
+    border-radius: 40px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.clear-section i {
+    width: 14px;
+    height: 14px;
+}
+
+.clear-section:hover {
+    background: #E27C7C;
+    color: white;
+}
+
+/* Question Cards */
+.question-card {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.question-card:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.question-number {
+    display: inline-block;
+    background: var(--primary, #4A6FA5);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.question-text {
+    font-weight: 500;
+    margin-bottom: 14px;
+    color: var(--text, #2D3E50);
+    font-size: 0.95rem;
+}
+
+/* Rating Buttons */
+.rating-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.rating-btn {
+    flex: 1;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.rating-btn input {
+    display: none;
+}
+
+.rating-btn span {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 8px 4px;
+    background: var(--bg, #F9F7F5);
+    border-radius: 8px;
+    transition: all 0.3s;
+    color: var(--text-light, #6B7280);
+}
+
+.rating-btn span small {
+    font-size: 0.6rem;
+    font-weight: normal;
+    display: block;
+}
+
+.rating-btn:hover span {
+    background: rgba(74, 111, 165, 0.1);
+    transform: scale(1.02);
+}
+
+.rating-btn input:checked + span {
+    background: var(--primary, #4A6FA5);
+    color: white;
+}
+
+/* Navigation Buttons */
+.navigation-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 32px;
+    border-radius: 40px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.nav-btn i {
+    width: 18px;
+    height: 18px;
+}
+
+.nav-btn.prev {
+    background: #e5e7eb;
+    color: var(--text, #2D3E50);
+}
+
+.nav-btn.prev:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.nav-btn.prev:hover:not(:disabled) {
+    background: #d1d5db;
+}
+
+.nav-btn.next {
+    background: var(--primary, #4A6FA5);
+    color: white;
+}
+
+.nav-btn.next:hover {
+    background: #3a5a8a;
+    transform: translateY(-2px);
+}
+
+.nav-btn.submit {
+    background: #86A789;
+    color: white;
+}
+
+.nav-btn.submit:hover {
+    background: #6c8e6f;
+    transform: translateY(-2px);
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--surface, white);
+    border-radius: 20px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-light, #6B7280);
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-body p {
+    margin-bottom: 12px;
+}
+
+.warning-text {
+    color: #E27C7C;
+    font-size: 0.875rem;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.btn-cancel {
+    padding: 8px 20px;
+    background: #e5e7eb;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+}
+
+.btn-confirm {
+    padding: 8px 20px;
+    background: #E27C7C;
+    color: white;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+}
+
+.btn-confirm:hover {
+    background: #c86a6a;
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    padding: 12px 24px;
+    border-radius: 40px;
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.toast-success {
+    background: #86A789;
+    color: white;
+}
+
+.toast-warning {
+    background: #E8A87C;
+    color: white;
+}
+
+.toast-error {
+    background: #E27C7C;
+    color: white;
+}
+
+.toast-info {
+    background: #4A6FA5;
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .psychometric-wrapper {
+        padding-top: 80px;
+        padding-bottom: 40px;
+    }
+    
+    .test-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .section-tabs {
+        gap: 6px;
+    }
+    
+    .tab {
+        padding: 8px 12px;
+        font-size: 0.7rem;
+    }
+    
+    .test-section {
+        padding: 16px;
+    }
+    
+    .rating-buttons {
+        gap: 4px;
+    }
+    
+    .rating-btn span {
+        font-size: 0.7rem;
+        padding: 6px 2px;
+    }
+    
+    .rating-btn span small {
+        font-size: 0.5rem;
+    }
+    
+    .navigation-buttons {
+        flex-direction: column;
+    }
+    
+    .nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .action-buttons button {
+        justify-content: center;
+    }
+    
+    .toast {
+        white-space: normal;
+        text-align: center;
+        max-width: 90%;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.test-section {
+    animation: fadeIn 0.3s ease;
+}
+</style>
+{% endblock %}

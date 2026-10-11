@@ -1,0 +1,349 @@
+<!-- templates/results.html - Updated -->
+{% extends "base.html" %}
+
+{% block title %}Your Career Recommendations - CareerGuide AI{% endblock %}
+
+{% block content %}
+<section class="results-section">
+    <div class="container">
+        <div class="results-header">
+            <h1>Your Career Recommendations</h1>
+            <p>Based on your quiz answers, here are careers that match your profile</p>
+        </div>
+        
+        <div class="results-filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="high">High Match (>80%)</button>
+            <button class="filter-btn" data-filter="medium">Medium Match (60-80%)</button>
+            <button class="filter-btn" data-filter="low">Low Match (<60%)</button>
+        </div>
+        
+        <div class="recommendations-grid" id="recommendationsGrid">
+            <div class="loading-spinner">
+                <i data-feather="loader"></i>
+                <p>Loading your recommendations...</p>
+            </div>
+        </div>
+        
+        <div class="results-actions">
+            <a href="/quiz" class="btn btn-outline">
+                <i data-feather="refresh-cw"></i>
+                Retake Quiz
+            </a>
+            <a href="/chatbot" class="btn btn-primary">
+                <i data-feather="message-circle"></i>
+                Ask AI Assistant
+            </a>
+        </div>
+    </div>
+</section>
+
+<script>
+function getMatchScoreClass(score) {
+    if (score >= 80) return 'high-match';
+    if (score >= 60) return 'medium-match';
+    return 'low-match';
+}
+
+function formatMatchScore(score) {
+    return Math.round(score) + '%';
+}
+
+function renderRecommendations(recommendations, filter = 'all') {
+    const grid = document.getElementById('recommendationsGrid');
+    if (!grid) return;
+    
+    let filtered = recommendations;
+    if (filter === 'high') {
+        filtered = recommendations.filter(r => r.match_score >= 80);
+    } else if (filter === 'medium') {
+        filtered = recommendations.filter(r => r.match_score >= 60 && r.match_score < 80);
+    } else if (filter === 'low') {
+        filtered = recommendations.filter(r => r.match_score < 60);
+    }
+    
+    if (!filtered || filtered.length === 0) {
+        grid.innerHTML = `
+            <div class="no-results">
+                <i data-feather="search"></i>
+                <p>No careers found in this category. Try a different filter!</p>
+            </div>
+        `;
+        if (typeof feather !== 'undefined') feather.replace();
+        return;
+    }
+    
+    grid.innerHTML = filtered.map(career => `
+        <div class="career-card recommendation-card">
+            <div class="career-header">
+                <h3>${escapeHtml(career.Career_Name || '')}</h3>
+                <span class="match-badge ${getMatchScoreClass(career.match_score)}">
+                    ${formatMatchScore(career.match_score)}
+                </span>
+            </div>
+            <p class="career-category">${escapeHtml(career.Category || '')}</p>
+            <div class="career-details">
+                <div class="detail-item">
+                    <i data-feather="book-open"></i>
+                    <span>${escapeHtml(career.Min_Education || 'N/A')}</span>
+                </div>
+                <div class="detail-item">
+                    <i data-feather="trending-up"></i>
+                    <span>${escapeHtml(career.Entry_Salary_LPA || 'N/A')}</span>
+                </div>
+                <div class="detail-item">
+                    <i data-feather="briefcase"></i>
+                    <span>${escapeHtml(career.Job_Outlook || 'N/A')}</span>
+                </div>
+            </div>
+            <div class="skills-preview">
+                <strong>Key skills:</strong> ${escapeHtml((career.Key_Technical_Skills || '').split(', ').slice(0, 3).join(', '))}...
+            </div>
+            <a href="/career/${career.Career_ID}" class="btn btn-small btn-primary">
+                View Details
+                <i data-feather="arrow-right"></i>
+            </a>
+        </div>
+    `).join('');
+    
+    if (typeof feather !== 'undefined') feather.replace();
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Load recommendations from session storage
+const recommendations = sessionStorage.getItem('recommendations');
+
+if (recommendations) {
+    try {
+        const recs = JSON.parse(recommendations);
+        console.log('Loaded recommendations:', recs);
+        
+        if (recs && recs.length > 0) {
+            renderRecommendations(recs);
+            
+            // Setup filters
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    renderRecommendations(recs, btn.dataset.filter);
+                });
+            });
+        } else {
+            document.getElementById('recommendationsGrid').innerHTML = `
+                <div class="no-results">
+                    <i data-feather="alert-circle"></i>
+                    <p>No recommendations found. Please retake the quiz.</p>
+                    <a href="/quiz" class="btn btn-primary">Retake Quiz</a>
+                </div>
+            `;
+        }
+    } catch (e) {
+        console.error('Error parsing recommendations:', e);
+        document.getElementById('recommendationsGrid').innerHTML = `
+            <div class="no-results">
+                <i data-feather="alert-circle"></i>
+                <p>Error loading recommendations. Please retake the quiz.</p>
+                <a href="/quiz" class="btn btn-primary">Retake Quiz</a>
+            </div>
+        `;
+    }
+} else {
+    // If no recommendations, redirect to quiz
+    window.location.href = '/quiz';
+}
+</script>
+
+<style>
+.results-section {
+    padding: 48px 0;
+}
+
+.results-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.results-header h1 {
+    font-size: 2rem;
+    margin-bottom: 16px;
+}
+
+.results-filters {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 8px 20px;
+    border-radius: 40px;
+    background: transparent;
+    border: 2px solid var(--primary, #4A6FA5);
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+    background: var(--primary, #4A6FA5);
+    color: white;
+}
+
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    margin-bottom: 48px;
+}
+
+.recommendation-card {
+    background: var(--surface, white);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: all 0.3s;
+    position: relative;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.career-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.career-header h3 {
+    font-size: 1.25rem;
+    margin: 0;
+    flex: 1;
+}
+
+.match-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.match-badge.high-match {
+    background: #d4edda;
+    color: #155724;
+}
+
+.match-badge.medium-match {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.match-badge.low-match {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.career-category {
+    color: var(--secondary, #6B8C9E);
+    font-size: 0.875rem;
+    margin-bottom: 16px;
+}
+
+.career-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+}
+
+.detail-item i {
+    width: 16px;
+    height: 16px;
+}
+
+.skills-preview {
+    font-size: 0.875rem;
+    color: var(--text-light, #6B7280);
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+.results-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.no-results {
+    text-align: center;
+    padding: 48px;
+    background: var(--surface, white);
+    border-radius: 16px;
+}
+
+.no-results i {
+    width: 48px;
+    height: 48px;
+    color: var(--text-light, #6B7280);
+    margin-bottom: 16px;
+}
+
+.no-results p {
+    margin-bottom: 20px;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 48px;
+}
+
+.loading-spinner i {
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .recommendations-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .results-filters {
+        gap: 8px;
+    }
+    
+    .filter-btn {
+        padding: 6px 16px;
+        font-size: 0.875rem;
+    }
+}
+</style>
+{% endblock %}

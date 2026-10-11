@@ -1,0 +1,412 @@
+{% extends "base.html" %}
+
+{% block title %}Compare Careers - CareerGuide AI{% endblock %}
+
+{% block content %}
+<section class="compare-section">
+    <div class="container">
+        <div class="compare-header">
+            <h1>Compare Careers</h1>
+            <p>Select up to 3 careers to compare side by side</p>
+        </div>
+        
+        <div class="compare-controls">
+            <div class="compare-select" id="compareSelect1">
+                <select id="careerSelect1" class="career-select">
+                    <option value="">Select a career...</option>
+                    {% for career in careers %}
+                    <option value="{{ career.Career_ID }}">{{ career.Career_Name }} ({{ career.Category }})</option>
+                    {% endfor %}
+                </select>
+                <button class="btn btn-small btn-outline remove-select" data-select="1">×</button>
+            </div>
+            
+            <div class="compare-select" id="compareSelect2">
+                <select id="careerSelect2" class="career-select">
+                    <option value="">Select a career...</option>
+                    {% for career in careers %}
+                    <option value="{{ career.Career_ID }}">{{ career.Career_Name }} ({{ career.Category }})</option>
+                    {% endfor %}
+                </select>
+                <button class="btn btn-small btn-outline remove-select" data-select="2">×</button>
+            </div>
+            
+            <div class="compare-select" id="compareSelect3">
+                <select id="careerSelect3" class="career-select">
+                    <option value="">Select a career...</option>
+                    {% for career in careers %}
+                    <option value="{{ career.Career_ID }}">{{ career.Career_Name }} ({{ career.Category }})</option>
+                    {% endfor %}
+                </select>
+                <button class="btn btn-small btn-outline remove-select" data-select="3">×</button>
+            </div>
+            
+            <button id="addCompareBtn" class="btn btn-secondary">
+                <i data-feather="plus"></i>
+                Add Career
+            </button>
+        </div>
+        
+        <div class="compare-table-wrapper">
+            <table class="compare-table" id="compareTable">
+                <thead>
+                    <tr>
+                        <th>Attribute</th>
+                        <th id="career1Header">Career 1</th>
+                        <th id="career2Header">Career 2</th>
+                        <th id="career3Header">Career 3</th>
+                    </tr>
+                </thead>
+                <tbody id="compareBody">
+                    <tr>
+                        <td colspan="4" class="no-data">Select careers to compare</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="compare-actions">
+            <button id="clearCompareBtn" class="btn btn-outline">
+                <i data-feather="trash-2"></i>
+                Clear All
+            </button>
+            <button id="shareCompareBtn" class="btn btn-primary">
+                <i data-feather="share-2"></i>
+                Share Comparison
+            </button>
+        </div>
+    </div>
+</section>
+
+<script>
+    const compareData = {
+        careers: {},
+        selectedIds: []
+    };
+    
+    // Load saved comparison from localStorage
+    function loadCompareList() {
+        const saved = localStorage.getItem('compareList');
+        if (saved) {
+            const ids = JSON.parse(saved);
+            ids.forEach((id, index) => {
+                if (index < 3) {
+                    loadCareerData(id, index + 1);
+                }
+            });
+        }
+    }
+    
+    // Fetch career data from API
+    async function loadCareerData(careerId, position) {
+        try {
+            const response = await fetch(`/api/career/${careerId}`);
+            const career = await response.json();
+            compareData.careers[careerId] = career;
+            compareData.selectedIds[position - 1] = careerId;
+            
+            // Update select dropdown
+            const select = document.getElementById(`careerSelect${position}`);
+            if (select) {
+                select.value = careerId;
+            }
+            
+            // Update header
+            const header = document.getElementById(`career${position}Header`);
+            if (header) {
+                header.innerHTML = `<a href="/career/${careerId}">${career.Career_Name}</a>`;
+            }
+            
+            renderCompareTable();
+        } catch (error) {
+            console.error('Error loading career data:', error);
+        }
+    }
+    
+    // Render comparison table
+    function renderCompareTable() {
+        const tbody = document.getElementById('compareBody');
+        const selectedCareers = compareData.selectedIds.filter(id => id).map(id => compareData.careers[id]);
+        
+        if (selectedCareers.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="no-data">Select careers to compare</td></tr>';
+            return;
+        }
+        
+        const attributes = [
+            { key: 'Category', label: 'Category', icon: 'briefcase' },
+            { key: 'Min_Education', label: 'Minimum Education', icon: 'book-open' },
+            { key: 'Preferred_Stream', label: 'Preferred Stream', icon: 'trending-up' },
+            { key: 'Required_Degree', label: 'Required Degree', icon: 'award' },
+            { key: 'Duration_Years', label: 'Duration (Years)', icon: 'clock' },
+            { key: 'Entry_Salary_LPA', label: 'Entry Salary', icon: 'trending-up' },
+            { key: 'Mid_Salary_LPA', label: 'Mid Salary', icon: 'trending-up' },
+            { key: 'Senior_Salary_LPA', label: 'Senior Salary', icon: 'trending-up' },
+            { key: 'Job_Outlook', label: 'Job Outlook', icon: 'activity' },
+            { key: 'Key_Technical_Skills', label: 'Technical Skills', icon: 'code' },
+            { key: 'Key_Soft_Skills', label: 'Soft Skills', icon: 'users' },
+            { key: 'Top_Recruiters_India', label: 'Top Recruiters', icon: 'building' }
+        ];
+        
+        let html = '';
+        attributes.forEach(attr => {
+            html += '<tr>';
+            html += `<td class="attribute-label">
+                        <i data-feather="${attr.icon}"></i>
+                        <strong>${attr.label}</strong>
+                    </td>`;
+            
+            for (let i = 0; i < 3; i++) {
+                const career = selectedCareers[i];
+                if (career && career[attr.key]) {
+                    let value = career[attr.key];
+                    if (attr.key.includes('Salary')) {
+                        value = value || 'N/A';
+                    } else if (attr.key.includes('Skills') || attr.key === 'Top_Recruiters_India') {
+                        value = value.split(',').slice(0, 3).join(', ');
+                        if (value.length > 50) value = value.substring(0, 50) + '...';
+                    }
+                    html += `<td>${value || 'N/A'}</td>`;
+                } else {
+                    html += '<td class="empty">—</td>';
+                }
+            }
+            html += '</tr>';
+        });
+        
+        tbody.innerHTML = html;
+        feather.replace();
+    }
+    
+    // Handle select changes
+    document.getElementById('careerSelect1')?.addEventListener('change', (e) => {
+        if (e.target.value) {
+            loadCareerData(e.target.value, 1);
+        }
+    });
+    
+    document.getElementById('careerSelect2')?.addEventListener('change', (e) => {
+        if (e.target.value) {
+            loadCareerData(e.target.value, 2);
+        }
+    });
+    
+    document.getElementById('careerSelect3')?.addEventListener('change', (e) => {
+        if (e.target.value) {
+            loadCareerData(e.target.value, 3);
+        }
+    });
+    
+    // Add career button
+    let visibleSelects = 1;
+    document.getElementById('addCompareBtn')?.addEventListener('click', () => {
+        if (visibleSelects < 3) {
+            visibleSelects++;
+            const selectDiv = document.getElementById(`compareSelect${visibleSelects}`);
+            if (selectDiv) {
+                selectDiv.style.display = 'flex';
+            }
+        } else {
+            showToast('You can compare up to 3 careers at a time', 'info');
+        }
+    });
+    
+    // Remove select buttons
+    document.querySelectorAll('.remove-select').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const selectNum = parseInt(btn.dataset.select);
+            const selectDiv = document.getElementById(`compareSelect${selectNum}`);
+            const select = document.getElementById(`careerSelect${selectNum}`);
+            
+            if (select) {
+                select.value = '';
+            }
+            
+            // Clear data
+            const careerId = compareData.selectedIds[selectNum - 1];
+            if (careerId) {
+                delete compareData.careers[careerId];
+                compareData.selectedIds[selectNum - 1] = null;
+            }
+            
+            // Update header
+            const header = document.getElementById(`career${selectNum}Header`);
+            if (header) {
+                header.innerHTML = `Career ${selectNum}`;
+            }
+            
+            renderCompareTable();
+            
+            // Hide if not needed
+            if (selectNum > 1 && !compareData.selectedIds.some(id => id)) {
+                selectDiv.style.display = 'none';
+                visibleSelects--;
+            }
+        });
+    });
+    
+    // Clear all
+    document.getElementById('clearCompareBtn')?.addEventListener('click', () => {
+        compareData.careers = {};
+        compareData.selectedIds = [];
+        localStorage.removeItem('compareList');
+        
+        for (let i = 1; i <= 3; i++) {
+            const select = document.getElementById(`careerSelect${i}`);
+            if (select) select.value = '';
+            const header = document.getElementById(`career${i}Header`);
+            if (header) header.innerHTML = `Career ${i}`;
+            const selectDiv = document.getElementById(`compareSelect${i}`);
+            if (selectDiv && i > 1) selectDiv.style.display = 'none';
+        }
+        
+        visibleSelects = 1;
+        renderCompareTable();
+        showToast('Comparison cleared', 'success');
+    });
+    
+    // Share comparison
+    document.getElementById('shareCompareBtn')?.addEventListener('click', () => {
+        const selectedIds = compareData.selectedIds.filter(id => id);
+        if (selectedIds.length === 0) {
+            showToast('Select careers to share first', 'error');
+            return;
+        }
+        
+        const shareUrl = `${window.location.origin}/compare?ids=${selectedIds.join(',')}`;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: 'Career Comparison',
+                text: 'Check out these career comparisons!',
+                url: shareUrl
+            });
+        } else {
+            // Fallback: copy to clipboard
+            navigator.clipboard.writeText(shareUrl);
+            showToast('Link copied to clipboard!', 'success');
+        }
+    });
+    
+    // Load initial comparison
+    loadCompareList();
+</script>
+
+<style>
+.compare-section {
+    padding: 48px 0;
+}
+
+.compare-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.compare-controls {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.compare-select {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex: 1;
+    min-width: 200px;
+}
+
+.career-select {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-family: inherit;
+    background: var(--surface);
+}
+
+.compare-table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 32px;
+}
+
+.compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.compare-table th,
+.compare-table td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.compare-table th {
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+}
+
+.compare-table th a {
+    color: white;
+    text-decoration: none;
+}
+
+.compare-table .attribute-label {
+    background: var(--bg);
+    font-weight: 500;
+    width: 200px;
+}
+
+.compare-table .attribute-label i {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.compare-table .empty {
+    color: var(--text-light);
+    text-align: center;
+}
+
+.compare-table .no-data {
+    text-align: center;
+    padding: 48px;
+    color: var(--text-light);
+}
+
+.compare-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+@media (max-width: 768px) {
+    .compare-controls {
+        flex-direction: column;
+    }
+    
+    .compare-select {
+        width: 100%;
+    }
+    
+    .compare-table .attribute-label {
+        width: 120px;
+    }
+    
+    .compare-table th,
+    .compare-table td {
+        padding: 12px;
+        font-size: 0.875rem;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,1399 @@
+<!-- templates/quiz.html -->
+{% extends "base.html" %}
+
+{% block title %}Career Assessment Quiz - CareerGuide AI{% endblock %}
+
+{% block content %}
+<div class="quiz-wrapper">
+    <div class="container">
+        <!-- Header Section -->
+        <div class="quiz-header">
+            <h1>🎯 Career Assessment Quiz</h1>
+            <p>Answer these 8 simple questions to get personalized career recommendations based on your interests, education, and preferences</p>
+            
+            <div class="quiz-stats">
+                <div class="stat-card">
+                    <i data-feather="clock"></i>
+                    <span>5-7 minutes</span>
+                </div>
+                <div class="stat-card">
+                    <i data-feather="file-text"></i>
+                    <span>8 Questions</span>
+                </div>
+                <div class="stat-card">
+                    <i data-feather="trending-up"></i>
+                    <span>Instant Results</span>
+                </div>
+                <div class="stat-card">
+                    <i data-feather="award"></i>
+                    <span>300+ Careers</span>
+                </div>
+            </div>
+            
+            <!-- Quiz Actions -->
+            <div class="quiz-actions">
+                <button type="button" class="btn-action btn-reset" id="resetQuizBtn">
+                    <i data-feather="trash-2"></i> Reset All Answers
+                </button>
+                <button type="button" class="btn-action btn-save" id="saveQuizBtn">
+                    <i data-feather="save"></i> Save Progress
+                </button>
+                <button type="button" class="btn-action btn-load" id="loadQuizBtn">
+                    <i data-feather="folder"></i> Load Progress
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-wrapper">
+            <div class="progress-label">
+                <span>📊 Quiz Progress</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-count" id="answeredCount">0 of 8 questions answered</div>
+        </div>
+
+        <!-- Quiz Form -->
+        <form id="quizForm" class="quiz-form">
+            <!-- Question 1: Education Level -->
+            <div class="quiz-question" id="q1">
+                <div class="question-header">
+                    <span class="question-number">Question 1 of 8</span>
+                    <button type="button" class="clear-question" data-q="1">
+                        <i data-feather="x-circle"></i> Clear
+                    </button>
+                </div>
+                <h3>What is your current or highest education level?</h3>
+                <div class="options-grid">
+                    <label class="option-card">
+                        <input type="radio" name="education" value="10+2">
+                        <div class="option-content">
+                            <i data-feather="book-open"></i>
+                            <span class="option-title">10+2 / High School</span>
+                            <span class="option-desc">Completed 12th grade</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="education" value="Diploma">
+                        <div class="option-content">
+                            <i data-feather="award"></i>
+                            <span class="option-title">Diploma</span>
+                            <span class="option-desc">Polytechnic or vocational diploma</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="education" value="Bachelor's">
+                        <div class="option-content">
+                            <i data-feather="graduation-cap"></i>
+                            <span class="option-title">Bachelor's Degree</span>
+                            <span class="option-desc">Undergraduate degree (B.Sc, B.Com, B.A, B.Tech, etc.)</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="education" value="Master's">
+                        <div class="option-content">
+                            <i data-feather="award"></i>
+                            <span class="option-title">Master's Degree</span>
+                            <span class="option-desc">Postgraduate degree (M.Sc, M.Com, M.A, M.Tech, MBA, etc.)</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 2: Academic Stream -->
+            <div class="quiz-question" id="q2" style="display: none;">
+                <div class="question-header">
+                    <span class="question-number">Question 2 of 8</span>
+                    <button type="button" class="clear-question" data-q="2">
+                        <i data-feather="x-circle"></i> Clear
+                    </button>
+                </div>
+                <h3>What was your academic stream/background?</h3>
+                <div class="options-grid">
+                    <label class="option-card">
+                        <input type="radio" name="stream" value="Science">
+                        <div class="option-content">
+                            <i data-feather="zap"></i>
+                            <span class="option-title">Science</span>
+                            <span class="option-desc">PCM (Physics, Chemistry, Maths) or PCB (Physics, Chemistry, Biology)</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="stream" value="Commerce">
+                        <div class="option-content">
+                            <i data-feather="trending-up"></i>
+                            <span class="option-title">Commerce</span>
+                            <span class="option-desc">Accountancy, Business Studies, Economics</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="stream" value="Arts">
+                        <div class="option-content">
+                            <i data-feather="palette"></i>
+                            <span class="option-title">Arts / Humanities</span>
+                            <span class="option-desc">History, Geography, Political Science, Psychology, etc.</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="stream" value="Any">
+                        <div class="option-content">
+                            <i data-feather="globe"></i>
+                            <span class="option-title">Any / Open to All</span>
+                            <span class="option-desc">No specific stream preference</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 3: Career Interests (Multiple Select) -->
+            <div class="quiz-question" id="q3" style="display: none;">
+                <div class="question-header">
+                    <span class="question-number">Question 3 of 8</span>
+                    <button type="button" class="clear-question" data-q="3">
+                        <i data-feather="x-circle"></i> Clear
+                    </button>
+                </div>
+                <h3>What areas interest you the most? (Select all that apply)</h3>
+                <p class="question-hint">Choose as many as you like</p>
+                <div class="options-grid multiple">
+                    <label class="option-card checkbox">
+                        <input type="checkbox" name="interests" value="Healthcare">
+                        <div class="option-content">
+                            <i data-feather="heart"></i>
+                            <span class="option-title">Healthcare & Medicine</span>
+                            <span class="option-desc">Doctor, Nurse, Pharmacist, Therapist</span>
+                        </div>
+                    </label>
+                    <label class="option-card checkbox">
+                        <input type="checkbox" name="interests" value="Technology">
+                        <div class="option-content">
+                            <i data-feather="cpu"></i>
+                            <span class="option-title">Technology & Computers</span>
+                            <span class="option-desc">Software, AI, Cybersecurity, IT</span>
+                        </div>
+                    </label>
+                    <label class="option-card checkbox">
+                        <input type="checkbox" name="interests" value="Engineering">
+                        <div class="option-content">
+                            <i data-feather="tool"></i>
+                            <span class="option-title">Engineering & Building</span>
+                            <span class="option-desc">Civil, Mechanical, Electrical, Robotics</span>
+                        </div>
+                    </label>
+                    <label class="option-card checkbox">
+                        <input type="checkbox" name="interests" value="Business">
+                        <div class="option-content">
+                            <i data-feather="briefcase"></i>
+                            <span class="option-title">Business & Management</span>
+                            <span class="option-desc">Marketing, Finance, HR, Entrepreneurship</span>
+                        </div>
+                    </label>
+                    <label class="option-card checkbox">
+                        <input type="checkbox" name="interests" value="Creative">
+                        <div class="option-content">
+                            <i data-feather="palette"></i>
+                            <span class="option-title">Creative Arts & Design</span>
+                            <span class="option-desc">Graphic Design, Animation, Fashion, Interior Design</span>
+                        </div>
+                    </label>
+                    <label class="option-card checkbox">
+                        <input type="checkbox" name="interests" value="Social">
+                        <div class="option-content">
+                            <i data-feather="users"></i>
+                            <span class="option-title">Social Work & Education</span>
+                            <span class="option-desc">Teaching, Counseling, NGO, Social Service</span>
+                        </div>
+                    </label>
+                    <label class="option-card checkbox">
+                        <input type="checkbox" name="interests" value="Research">
+                        <div class="option-content">
+                            <i data-feather="globe"></i>
+                            <span class="option-title">Research & Science</span>
+                            <span class="option-desc">Laboratory, Space, Environmental, Biotechnology</span>
+                        </div>
+                    </label>
+                    <label class="option-card checkbox">
+                        <input type="checkbox" name="interests" value="Government">
+                        <div class="option-content">
+                            <i data-feather="shield"></i>
+                            <span class="option-title">Government & Defense</span>
+                            <span class="option-desc">Civil Services, Police, Army, Administrative Services</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 4: Skills (Multiple Select) -->
+            <div class="quiz-question" id="q4" style="display: none;">
+                <div class="question-header">
+                    <span class="question-number">Question 4 of 8</span>
+                    <button type="button" class="clear-question" data-q="4">
+                        <i data-feather="x-circle"></i> Clear
+                    </button>
+                </div>
+                <h3>What skills do you have or want to develop? (Select all that apply)</h3>
+                <p class="question-hint">Choose as many as you like</p>
+                <div class="options-grid multiple">
+                    <label class="option-card checkbox">
+                        <input type="checkbox" name="skills" value="Programming">
+                        <div class="option-content">
+                            <i data-feather="code"></i>
+                            <span class="option-title">Programming / Coding</span>
+                            <span class="option-desc">Python, Java, JavaScript, Web Development</span>
+                        </div>
+                    </label>
+                    <label class="option-card checkbox">
+                        <input type="checkbox" name="skills" value="Data Analysis">
+                        <div class="option-content">
+                            <i data-feather="bar-chart-2"></i>
+                            <span class="option-title">Data Analysis</span>
+                            <span class="option-desc">SQL, Excel, Statistics, Machine Learning</span>
+                        </div>
+                    </label>
+                    <label class="option-card checkbox">
+                        <input type="checkbox" name="skills" value="Communication">
+                        <div class="option-content">
+                            <i data-feather="message-circle"></i>
+                            <span class="option-title">Communication / Writing</span>
+                            <span class="option-desc">Content Writing, Public Speaking, Copywriting</span>
+                        </div>
+                    </label>
+                    <label class="option-card checkbox">
+                        <input type="checkbox" name="skills" value="Leadership">
+                        <div class="option-content">
+                            <i data-feather="users"></i>
+                            <span class="option-title">Leadership / Management</span>
+                            <span class="option-desc">Team Management, Project Planning, Strategy</span>
+                        </div>
+                    </label>
+                    <label class="option-card checkbox">
+                        <input type="checkbox" name="skills" value="Creative">
+                        <div class="option-content">
+                            <i data-feather="pen-tool"></i>
+                            <span class="option-title">Creative / Design</span>
+                            <span class="option-desc">Photoshop, Illustrator, Video Editing, UI/UX</span>
+                        </div>
+                    </label>
+                    <label class="option-card checkbox">
+                        <input type="checkbox" name="skills" value="Analytical">
+                        <div class="option-content">
+                            <i data-feather="trending-up"></i>
+                            <span class="option-title">Analytical / Problem Solving</span>
+                            <span class="option-desc">Critical Thinking, Research, Logic</span>
+                        </div>
+                    </label>
+                    <label class="option-card checkbox">
+                        <input type="checkbox" name="skills" value="Technical">
+                        <div class="option-content">
+                            <i data-feather="tool"></i>
+                            <span class="option-title">Technical / Hands-on</span>
+                            <span class="option-desc">Repair, Construction, Manufacturing, Maintenance</span>
+                        </div>
+                    </label>
+                    <label class="option-card checkbox">
+                        <input type="checkbox" name="skills" value="Teaching">
+                        <div class="option-content">
+                            <i data-feather="book-open"></i>
+                            <span class="option-title">Teaching / Training</span>
+                            <span class="option-desc">Instruction, Mentoring, Curriculum Development</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 5: Work Environment -->
+            <div class="quiz-question" id="q5" style="display: none;">
+                <div class="question-header">
+                    <span class="question-number">Question 5 of 8</span>
+                    <button type="button" class="clear-question" data-q="5">
+                        <i data-feather="x-circle"></i> Clear
+                    </button>
+                </div>
+                <h3>What work environment do you prefer?</h3>
+                <div class="options-grid">
+                    <label class="option-card">
+                        <input type="radio" name="work_environment" value="Office">
+                        <div class="option-content">
+                            <i data-feather="briefcase"></i>
+                            <span class="option-title">Office / Corporate</span>
+                            <span class="option-desc">Desk job, structured environment</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="work_environment" value="Field">
+                        <div class="option-content">
+                            <i data-feather="map-pin"></i>
+                            <span class="option-title">Field / Outdoor</span>
+                            <span class="option-desc">On-site, travel, outdoor work</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="work_environment" value="Remote">
+                        <div class="option-content">
+                            <i data-feather="home"></i>
+                            <span class="option-title">Remote / Flexible</span>
+                            <span class="option-desc">Work from home, flexible hours</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="work_environment" value="Laboratory">
+                        <div class="option-content">
+                            <i data-feather="flask"></i>
+                            <span class="option-title">Laboratory / Research</span>
+                            <span class="option-desc">Research, experiments, controlled environment</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="work_environment" value="Healthcare">
+                        <div class="option-content">
+                            <i data-feather="heart"></i>
+                            <span class="option-title">Healthcare Setting</span>
+                            <span class="option-desc">Hospital, clinic, patient care</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="work_environment" value="Any">
+                        <div class="option-content">
+                            <i data-feather="globe"></i>
+                            <span class="option-title">No Preference</span>
+                            <span class="option-desc">Open to any work environment</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 6: Salary Expectation -->
+            <div class="quiz-question" id="q6" style="display: none;">
+                <div class="question-header">
+                    <span class="question-number">Question 6 of 8</span>
+                    <button type="button" class="clear-question" data-q="6">
+                        <i data-feather="x-circle"></i> Clear
+                    </button>
+                </div>
+                <h3>What is your expected starting salary range? (LPA = Lakhs Per Annum)</h3>
+                <div class="options-grid">
+                    <label class="option-card">
+                        <input type="radio" name="salary_range" value="<3">
+                        <div class="option-content">
+                            <i data-feather="trending-down"></i>
+                            <span class="option-title">Below 3 LPA</span>
+                            <span class="option-desc">Entry level / fresher salary</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="salary_range" value="3-5">
+                        <div class="option-content">
+                            <i data-feather="trending-up"></i>
+                            <span class="option-title">3 - 5 LPA</span>
+                            <span class="option-desc">Good starting salary</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="salary_range" value="5-8">
+                        <div class="option-content">
+                            <i data-feather="trending-up"></i>
+                            <span class="option-title">5 - 8 LPA</span>
+                            <span class="option-desc">Above average starting salary</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="salary_range" value="8-12">
+                        <div class="option-content">
+                            <i data-feather="award"></i>
+                            <span class="option-title">8 - 12 LPA</span>
+                            <span class="option-desc">High starting salary</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="salary_range" value="12+">
+                        <div class="option-content">
+                            <i data-feather="star"></i>
+                            <span class="option-title">12+ LPA</span>
+                            <span class="option-desc">Premium starting salary</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 7: Job Outlook Preference -->
+            <div class="quiz-question" id="q7" style="display: none;">
+                <div class="question-header">
+                    <span class="question-number">Question 7 of 8</span>
+                    <button type="button" class="clear-question" data-q="7">
+                        <i data-feather="x-circle"></i> Clear
+                    </button>
+                </div>
+                <h3>What job outlook do you prefer?</h3>
+                <div class="options-grid">
+                    <label class="option-card">
+                        <input type="radio" name="job_outlook" value="Excellent">
+                        <div class="option-content">
+                            <i data-feather="zap"></i>
+                            <span class="option-title">Excellent / High Growth</span>
+                            <span class="option-desc">Rapidly growing field, high demand</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="job_outlook" value="Growing">
+                        <div class="option-content">
+                            <i data-feather="trending-up"></i>
+                            <span class="option-title">Growing / Stable</span>
+                            <span class="option-desc">Consistent growth, stable opportunities</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="job_outlook" value="Stable">
+                        <div class="option-content">
+                            <i data-feather="shield"></i>
+                            <span class="option-title">Stable / Consistent</span>
+                            <span class="option-desc">Traditional, reliable careers</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="job_outlook" value="Any">
+                        <div class="option-content">
+                            <i data-feather="globe"></i>
+                            <span class="option-title">Any / No Preference</span>
+                            <span class="option-desc">Open to all opportunities</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Question 8: Career Goals -->
+            <div class="quiz-question" id="q8" style="display: none;">
+                <div class="question-header">
+                    <span class="question-number">Question 8 of 8</span>
+                    <button type="button" class="clear-question" data-q="8">
+                        <i data-feather="x-circle"></i> Clear
+                    </button>
+                </div>
+                <h3>What are your long-term career goals?</h3>
+                <div class="options-grid">
+                    <label class="option-card">
+                        <input type="radio" name="goals" value="Expert">
+                        <div class="option-content">
+                            <i data-feather="award"></i>
+                            <span class="option-title">Become an Expert</span>
+                            <span class="option-desc">Specialize and master your field</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="goals" value="Leader">
+                        <div class="option-content">
+                            <i data-feather="users"></i>
+                            <span class="option-title">Lead Teams</span>
+                            <span class="option-desc">Management, leadership roles</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="goals" value="Entrepreneur">
+                        <div class="option-content">
+                            <i data-feather="briefcase"></i>
+                            <span class="option-title">Start My Own Business</span>
+                            <span class="option-desc">Entrepreneurship, innovation</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="goals" value="Social">
+                        <div class="option-content">
+                            <i data-feather="heart"></i>
+                            <span class="option-title">Make Social Impact</span>
+                            <span class="option-desc">Help others, community service</span>
+                        </div>
+                    </label>
+                    <label class="option-card">
+                        <input type="radio" name="goals" value="Balance">
+                        <div class="option-content">
+                            <i data-feather="sun"></i>
+                            <span class="option-title">Work-Life Balance</span>
+                            <span class="option-desc">Balance career with personal life</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="navigation-buttons">
+                <button type="button" class="nav-btn prev" id="prevBtn">
+                    <i data-feather="arrow-left"></i> Previous
+                </button>
+                <button type="button" class="nav-btn next" id="nextBtn">
+                    Next <i data-feather="arrow-right"></i>
+                </button>
+                <button type="submit" class="nav-btn submit" id="submitBtn" style="display: none;">
+                    Get Career Recommendations <i data-feather="arrow-right"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Reset Confirmation Modal -->
+<div id="resetModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>⚠️ Reset All Answers</h3>
+            <button class="modal-close" onclick="closeResetModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to reset ALL your quiz answers?</p>
+            <p class="warning-text">This will clear all 8 questions and cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeResetModal()">Cancel</button>
+            <button class="btn-confirm" id="confirmResetBtn">Yes, Reset Everything</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentQuestion = 1;
+const totalQuestions = 8;
+let quizAnswers = {};
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadFromStorage();
+    updateProgress();
+    setupEventListeners();
+    showQuestion(1);
+});
+
+function setupEventListeners() {
+    // Navigation buttons
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (prevBtn) prevBtn.addEventListener('click', previousQuestion);
+    if (nextBtn) nextBtn.addEventListener('click', nextQuestion);
+    if (submitBtn) submitBtn.addEventListener('click', submitQuiz);
+    
+    // Action buttons
+    const resetBtn = document.getElementById('resetQuizBtn');
+    const saveBtn = document.getElementById('saveQuizBtn');
+    const loadBtn = document.getElementById('loadQuizBtn');
+    const confirmReset = document.getElementById('confirmResetBtn');
+    
+    if (resetBtn) resetBtn.addEventListener('click', showResetModal);
+    if (confirmReset) confirmReset.addEventListener('click', resetAllAnswers);
+    if (saveBtn) saveBtn.addEventListener('click', saveToStorage);
+    if (loadBtn) loadBtn.addEventListener('click', loadFromStorage);
+    
+    // Clear question buttons
+    document.querySelectorAll('.clear-question').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const qNum = parseInt(this.getAttribute('data-q'));
+            clearQuestion(qNum);
+        });
+    });
+    
+    // Radio and checkbox changes
+    document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+        input.addEventListener('change', function() {
+            saveCurrentAnswers();
+            updateProgress();
+        });
+    });
+}
+
+function showQuestion(questionNum) {
+    if (questionNum < 1 || questionNum > totalQuestions) return;
+    
+    // Hide all questions
+    for (let i = 1; i <= totalQuestions; i++) {
+        const q = document.getElementById(`q${i}`);
+        if (q) q.style.display = 'none';
+    }
+    
+    // Show selected question
+    const currentQ = document.getElementById(`q${questionNum}`);
+    if (currentQ) currentQ.style.display = 'block';
+    
+    currentQuestion = questionNum;
+    
+    // Update navigation buttons
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    if (prevBtn) prevBtn.disabled = (questionNum === 1);
+    
+    if (questionNum === totalQuestions) {
+        if (nextBtn) nextBtn.style.display = 'none';
+        if (submitBtn) submitBtn.style.display = 'flex';
+    } else {
+        if (nextBtn) nextBtn.style.display = 'flex';
+        if (submitBtn) submitBtn.style.display = 'none';
+    }
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function previousQuestion() {
+    if (currentQuestion > 1) {
+        showQuestion(currentQuestion - 1);
+    }
+}
+
+function nextQuestion() {
+    if (currentQuestion < totalQuestions) {
+        // Optional: validate current question before moving
+        showQuestion(currentQuestion + 1);
+    }
+}
+
+function saveCurrentAnswers() {
+    // Save all answers from all questions
+    for (let q = 1; q <= totalQuestions; q++) {
+        const questionEl = document.getElementById(`q${q}`);
+        if (questionEl) {
+            const radios = questionEl.querySelectorAll('input[type="radio"]:checked');
+            const checkboxes = questionEl.querySelectorAll('input[type="checkbox"]:checked');
+            
+            radios.forEach(radio => {
+                quizAnswers[radio.name] = radio.value;
+            });
+            
+            checkboxes.forEach(checkbox => {
+                if (!quizAnswers[checkbox.name]) quizAnswers[checkbox.name] = [];
+                const value = checkbox.value;
+                if (!quizAnswers[checkbox.name].includes(value)) {
+                    quizAnswers[checkbox.name].push(value);
+                }
+            });
+        }
+    }
+}
+
+function updateProgress() {
+    let answered = 0;
+    
+    // Check each question
+    for (let q = 1; q <= totalQuestions; q++) {
+        const questionEl = document.getElementById(`q${q}`);
+        if (questionEl) {
+            const inputs = questionEl.querySelectorAll('input');
+            let hasAnswer = false;
+            
+            inputs.forEach(input => {
+                if (input.type === 'radio' && input.checked) hasAnswer = true;
+                if (input.type === 'checkbox' && input.checked) hasAnswer = true;
+            });
+            
+            if (hasAnswer) answered++;
+        }
+    }
+    
+    const percent = Math.round((answered / totalQuestions) * 100);
+    const progressFill = document.getElementById('progressFill');
+    const progressPercent = document.getElementById('progressPercent');
+    const answeredCount = document.getElementById('answeredCount');
+    
+    if (progressFill) progressFill.style.width = `${percent}%`;
+    if (progressPercent) progressPercent.textContent = `${percent}%`;
+    if (answeredCount) answeredCount.textContent = `${answered} of ${totalQuestions} questions answered`;
+}
+
+function clearQuestion(questionNum) {
+    const questionEl = document.getElementById(`q${questionNum}`);
+    if (!questionEl) return;
+    
+    const inputs = questionEl.querySelectorAll('input');
+    
+    inputs.forEach(input => {
+        if (input.type === 'radio' || input.type === 'checkbox') {
+            input.checked = false;
+            if (quizAnswers[input.name]) {
+                delete quizAnswers[input.name];
+            }
+        }
+    });
+    
+    saveToStorage();
+    updateProgress();
+    showToast(`Question ${questionNum} cleared!`, 'success');
+}
+
+function resetAllAnswers() {
+    // Clear all inputs
+    document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+        input.checked = false;
+    });
+    
+    // Clear answers object
+    quizAnswers = {};
+    
+    // Clear localStorage
+    localStorage.removeItem('quizAnswers');
+    
+    // Reset to first question
+    showQuestion(1);
+    
+    updateProgress();
+    showToast('All answers cleared! You can now retake the quiz.', 'success');
+    closeResetModal();
+}
+
+function saveToStorage() {
+    saveCurrentAnswers();
+    localStorage.setItem('quizAnswers', JSON.stringify(quizAnswers));
+    showToast('Progress saved successfully!', 'success');
+}
+
+function loadFromStorage() {
+    const saved = localStorage.getItem('quizAnswers');
+    if (saved) {
+        try {
+            const savedAnswers = JSON.parse(saved);
+            
+            // Clear all first
+            document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+                input.checked = false;
+            });
+            
+            // Load saved answers
+            Object.keys(savedAnswers).forEach(key => {
+                const value = savedAnswers[key];
+                if (Array.isArray(value)) {
+                    // Handle checkboxes
+                    value.forEach(val => {
+                        const input = document.querySelector(`input[name="${key}"][value="${val}"]`);
+                        if (input) input.checked = true;
+                    });
+                } else {
+                    // Handle radio buttons
+                    const input = document.querySelector(`input[name="${key}"][value="${value}"]`);
+                    if (input) input.checked = true;
+                }
+            });
+            
+            quizAnswers = savedAnswers;
+            updateProgress();
+            showToast('Progress loaded successfully!', 'success');
+        } catch(e) {
+            showToast('Error loading saved progress', 'error');
+        }
+    } else {
+        showToast('No saved progress found', 'info');
+    }
+}
+
+function showResetModal() {
+    const modal = document.getElementById('resetModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeResetModal() {
+    const modal = document.getElementById('resetModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function showToast(message, type) {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `<span>${message}</span>`;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+async function submitQuiz(event) {
+    event.preventDefault();
+    
+    // Check if all questions are answered
+    let allAnswered = true;
+    let unansweredQuestion = 0;
+    
+    for (let q = 1; q <= totalQuestions; q++) {
+        const questionEl = document.getElementById(`q${q}`);
+        if (questionEl) {
+            const inputs = questionEl.querySelectorAll('input');
+            let hasAnswer = false;
+            
+            inputs.forEach(input => {
+                if (input.type === 'radio' && input.checked) hasAnswer = true;
+                if (input.type === 'checkbox' && input.checked) hasAnswer = true;
+            });
+            
+            if (!hasAnswer) {
+                allAnswered = false;
+                unansweredQuestion = q;
+                break;
+            }
+        }
+    }
+    
+    if (!allAnswered) {
+        showToast(`Please answer Question ${unansweredQuestion} first`, 'warning');
+        showQuestion(unansweredQuestion);
+        return;
+    }
+    
+    saveCurrentAnswers();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i data-feather="loader"></i> Analyzing your profile...';
+    
+    try {
+        const response = await fetch('/api/quiz/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(quizAnswers)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            sessionStorage.setItem('recommendations', JSON.stringify(data.recommendations));
+            window.location.href = '/results';
+        } else {
+            throw new Error(data.error || 'Failed to get recommendations');
+        }
+    } catch (error) {
+        showToast('Something went wrong. Please try again.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Get Career Recommendations <i data-feather="arrow-right"></i>';
+    }
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('resetModal');
+    if (event.target === modal) {
+        closeResetModal();
+    }
+}
+</script>
+
+<style>
+/* Quiz Page Styles */
+.quiz-wrapper {
+    padding-top: 100px;
+    padding-bottom: 60px;
+    background: var(--bg, #F9F7F5);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Quiz Header */
+.quiz-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.quiz-header h1 {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    color: var(--text, #2D3E50);
+}
+
+.quiz-header p {
+    color: var(--text-light, #6B7280);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.quiz-stats {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--surface, white);
+    border-radius: 40px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.stat-card i {
+    width: 18px;
+    height: 18px;
+    color: var(--primary, #4A6FA5);
+}
+
+/* Quiz Actions */
+.quiz-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 40px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    font-family: inherit;
+}
+
+.btn-reset {
+    background: transparent;
+    border: 2px solid #E27C7C;
+    color: #E27C7C;
+}
+
+.btn-reset:hover {
+    background: #E27C7C;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-save {
+    background: transparent;
+    border: 2px solid #86A789;
+    color: #86A789;
+}
+
+.btn-save:hover {
+    background: #86A789;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-load {
+    background: transparent;
+    border: 2px solid #4A6FA5;
+    color: #4A6FA5;
+}
+
+.btn-load:hover {
+    background: #4A6FA5;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Progress Wrapper */
+.progress-wrapper {
+    background: var(--surface, white);
+    padding: 20px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.progress-bar-container {
+    height: 10px;
+    background: #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4A6FA5, #86A789);
+    border-radius: 10px;
+    transition: width 0.3s;
+    width: 0%;
+}
+
+.progress-count {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.75rem;
+    color: var(--text-light, #6B7280);
+}
+
+/* Quiz Questions */
+.quiz-question {
+    background: var(--surface, white);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    animation: fadeIn 0.3s ease;
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.question-number {
+    font-size: 0.875rem;
+    color: var(--primary, #4A6FA5);
+    font-weight: 600;
+}
+
+.clear-question {
+    background: transparent;
+    border: 1px solid #E27C7C;
+    color: #E27C7C;
+    padding: 4px 12px;
+    border-radius: 40px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.clear-question i {
+    width: 14px;
+    height: 14px;
+}
+
+.clear-question:hover {
+    background: #E27C7C;
+    color: white;
+}
+
+.quiz-question h3 {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+    color: var(--text, #2D3E50);
+}
+
+.question-hint {
+    font-size: 0.875rem;
+    color: var(--text-light, #6B7280);
+    margin-bottom: 20px;
+}
+
+/* Options Grid */
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.options-grid.multiple {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.option-card {
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.option-card input {
+    display: none;
+}
+
+.option-content {
+    padding: 20px;
+    background: var(--bg, #F9F7F5);
+    border-radius: 16px;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.option-card:hover .option-content {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.option-card input:checked + .option-content {
+    border-color: var(--primary, #4A6FA5);
+    background: rgba(74, 111, 165, 0.05);
+}
+
+.option-content i {
+    width: 32px;
+    height: 32px;
+    color: var(--primary, #4A6FA5);
+    margin-bottom: 12px;
+}
+
+.option-title {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text, #2D3E50);
+}
+
+.option-desc {
+    font-size: 0.75rem;
+    color: var(--text-light, #6B7280);
+}
+
+/* Navigation Buttons */
+.navigation-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border-radius: 40px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.nav-btn i {
+    width: 18px;
+    height: 18px;
+}
+
+.nav-btn.prev {
+    background: #e5e7eb;
+    color: var(--text, #2D3E50);
+}
+
+.nav-btn.prev:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.nav-btn.prev:hover:not(:disabled) {
+    background: #d1d5db;
+}
+
+.nav-btn.next {
+    background: var(--primary, #4A6FA5);
+    color: white;
+}
+
+.nav-btn.next:hover {
+    background: #3a5a8a;
+    transform: translateY(-2px);
+}
+
+.nav-btn.submit {
+    background: #86A789;
+    color: white;
+}
+
+.nav-btn.submit:hover {
+    background: #6c8e6f;
+    transform: translateY(-2px);
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--surface, white);
+    border-radius: 20px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-light, #6B7280);
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-body p {
+    margin-bottom: 12px;
+}
+
+.warning-text {
+    color: #E27C7C;
+    font-size: 0.875rem;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.btn-cancel {
+    padding: 8px 20px;
+    background: #e5e7eb;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+}
+
+.btn-confirm {
+    padding: 8px 20px;
+    background: #E27C7C;
+    color: white;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+}
+
+.btn-confirm:hover {
+    background: #c86a6a;
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    padding: 12px 24px;
+    border-radius: 40px;
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.toast-success {
+    background: #86A789;
+    color: white;
+}
+
+.toast-warning {
+    background: #E8A87C;
+    color: white;
+}
+
+.toast-error {
+    background: #E27C7C;
+    color: white;
+}
+
+.toast-info {
+    background: #4A6FA5;
+    color: white;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .quiz-wrapper {
+        padding-top: 80px;
+        padding-bottom: 40px;
+    }
+    
+    .quiz-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .quiz-question {
+        padding: 20px;
+    }
+    
+    .quiz-question h3 {
+        font-size: 1.125rem;
+    }
+    
+    .options-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .navigation-buttons {
+        flex-direction: column;
+    }
+    
+    .nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .quiz-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .quiz-actions button {
+        justify-content: center;
+    }
+    
+    .toast {
+        white-space: normal;
+        text-align: center;
+        max-width: 90%;
+    }
+}
+</style>
+{% endblock %}
