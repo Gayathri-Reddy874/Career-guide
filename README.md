@@ -11,7 +11,19 @@ An AI-powered career guidance web application that helps students and graduates 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Status](https://img.shields.io/badge/Status-Live-brightgreen)
 
-🔗 **Live Demo:** https://your-app-name.onrender.com  *(replace with your Render URL)*
+🔗 **Live Demo:** https://career-guide-ai-yr2f.onrender.com
+
+> ⏳ Hosted on Render's free tier, so the first visit after a period of inactivity can take up to a minute to wake up.
+
+---
+
+## 📸 Screenshots
+
+### Landing Page
+![Landing Page](Screenshots/Landling_Page.png)
+
+### Features
+![Features](Screenshots/Features.png)
 
 ---
 
@@ -40,7 +52,7 @@ An AI-powered career guidance web application that helps students and graduates 
 ## 📁 Project Structure
 
 ```
-Career-guide/
+career-guide-ai/
 ├── app.py              # Flask app, routes and recommendation logic
 ├── ai_summary.py       # Report/summary generation for tests
 ├── database.py         # SQLite models and queries
@@ -49,15 +61,16 @@ Career-guide/
 ├── requirements.txt    # Python dependencies
 ├── render.yaml         # Render deployment config
 ├── templates/          # HTML templates
-└── static/             # CSS, JS, images
+├── static/             # CSS, JS, images
+└── Screenshots/        # README screenshots
 ```
 
 ## 🚀 Run Locally
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/Gayathri-Reddy874/Career-guide.git
-cd Career-guide
+git clone https://github.com/Gayathri-Reddy874/career-guide-ai.git
+cd career-guide-ai
 
 # 2. Create and activate a virtual environment
 python -m venv venv
@@ -80,20 +93,18 @@ Open http://127.0.0.1:5000 in your browser.
 | Variable | Description |
 |----------|-------------|
 | `SECRET_KEY` | Flask session secret (use a long random value in production) |
+| `PYTHON_VERSION` | Set to `3.11.9` on Render |
 
 ## ☁️ Deploy on Render
 
 1. Push this repo to GitHub.
 2. On [Render](https://render.com) click **New + → Web Service** and connect the repo.
 3. Use these settings:
+   - **Language:** Python 3
    - **Build Command:** `pip install -r requirements.txt`
    - **Start Command:** `gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120`
    - **Health Check Path:** `/health`
-4. Add the `SECRET_KEY` environment variable and deploy.
-
-## 📸 Screenshots
-
-> Add screenshots of the home page, quiz results and dashboard in a `screenshots/` folder and link them here.
+4. Add the `SECRET_KEY` and `PYTHON_VERSION` (`3.11.9`) environment variables and deploy.
 
 ## 🔮 Future Improvements
 
