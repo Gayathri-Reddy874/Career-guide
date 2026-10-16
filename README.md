@@ -30,7 +30,7 @@ An AI-powered career guidance web application that helps students and graduates 
 ## ✨ Features
 
 - 🔍 **Career Explorer** - browse careers by category, search by name or skill, and view salary, skills, education and recruiters
-- 🧠 **Career Quiz** – recommends careers using TF-IDF + cosine similarity on your stream, interests and skills
+- 🧠 **Career Quiz** - recommends careers using TF-IDF + cosine similarity on your stream, interests and skills
 - 📝 **Psychometric Test** – personality, interests, aptitude, work-style and values assessment with a personalised report
 - 🧩 **IQ Test** – logical, numerical, verbal, spatial and memory sections with score analysis
 - ⚖️ **Compare Careers** – side-by-side comparison of multiple careers
